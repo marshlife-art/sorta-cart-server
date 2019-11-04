@@ -1,0 +1,37 @@
+version: '3'
+services:
+  # web:
+  #   build: .
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - .:/code
+  #     - logvolume01:/var/log
+  #   links:
+  #     - pg
+  #   network_mode: bridge
+  #   environment:
+  #     - PG_DATABASE_NAME=${PG_DATABASE_NAME}
+  #     - PG_DATABASE_USER=${PG_DATABASE_USER}
+  #     - PG_DATABASE_PASSWORD=${PG_DATABASE_PASSWORD}
+  #     - MAILGUN_API_KEY=key-
+  #     - MAILGUN_DOMAIN=mg.marshlife-art.org
+  #     - MAIL_GOES_TO=hello@marshlife-art.org
+  #     - VIRTUAL_HOST=http://marsh.ifitis.org
+  pg:
+    image: postgres:12-alpine
+    # restart: always
+    network_mode: bridge
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${PG_DATABASE_USER}
+      POSTGRES_PASSWORD: ${PG_DATABASE_PASSWORD}
+      POSTGRES_DB: ${PG_DATABASE_NAME}
+      PGDATA: /pgdata
+    volumes:
+      - pgdata:/pgdata
+      - logvolume01:/var/log
+volumes:
+  logvolume01: {}
+  pgdata: {}
