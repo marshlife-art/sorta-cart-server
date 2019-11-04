@@ -146,6 +146,30 @@ app.get('/products', function(req, res) {
   )
 })
 
+app.get('/categories', function(req, res) {
+  return Product.aggregate('category', 'DISTINCT', { plain: false }).then(
+    result => res.json(result.map(r => r['DISTINCT']))
+  )
+})
+
+app.get('/sub_categories', function(req, res) {
+  return Product.aggregate('sub_category', 'DISTINCT', { plain: false }).then(
+    result => res.json(result.map(r => r['DISTINCT']))
+  )
+})
+
+app.post('/products', function(req, res) {
+  console.log('/products req.body:', JSON.stringify(req.body))
+
+  getProducts(100, 0).then(result =>
+    res.json({
+      data: result.rows,
+      page: 0,
+      totalCount: result.count
+    })
+  )
+})
+
 app.listen(3000, function() {
   console.log('Express is running on port 3000')
 })
