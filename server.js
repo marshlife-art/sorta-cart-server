@@ -148,13 +148,29 @@ app.get('/products', function(req, res) {
 
 app.get('/categories', function(req, res) {
   return Product.aggregate('category', 'DISTINCT', { plain: false }).then(
-    result => res.json(result.map(r => r['DISTINCT']))
+    result =>
+      res.json(
+        result
+          .map(r => r['DISTINCT'])
+          .reduce((acc, cur) => {
+            acc[cur] = cur
+            return acc
+          }, {})
+      )
   )
 })
 
 app.get('/sub_categories', function(req, res) {
   return Product.aggregate('sub_category', 'DISTINCT', { plain: false }).then(
-    result => res.json(result.map(r => r['DISTINCT']))
+    result =>
+      res.json(
+        result
+          .map(r => r['DISTINCT'])
+          .reduce((acc, cur) => {
+            acc[cur] = cur
+            return acc
+          }, {})
+      )
   )
 })
 
