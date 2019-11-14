@@ -28,7 +28,7 @@ passport.use(strategy)
 const app = express()
 
 const corsOptions = {
-  origin: 'http://localhost:3001',
+  origin: '*',
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204, i guess.
 }
 app.use(cors(corsOptions))
@@ -47,8 +47,8 @@ const Op = models.Sequelize.Op
 const User = models.User
 
 // some helper functionz
-const createUser = async ({ name, password }) => {
-  return await User.create({ name, password })
+const createUser = async ({ name, email, password }) => {
+  return await User.create({ name, email, password })
 }
 
 const getAllUsers = async () => {
@@ -72,16 +72,16 @@ app.get('/users', function(req, res) {
 })
 
 app.post('/register', function(req, res, next) {
-  const { name, password } = req.body
-  createUser({ name, password }).then(user =>
+  const { name, email, password } = req.body
+  createUser({ name, email, password }).then(user =>
     res.json({ user, msg: 'account created successfully' })
   )
 })
 
 app.post('/login', async function(req, res, next) {
-  const { name, password } = req.body
-  if (name && password) {
-    let user = await getUser({ name: name })
+  const { email, password } = req.body
+  if (email && password) {
+    let user = await getUser({ email: email })
     if (!user) {
       res.status(401).json({ message: 'No such user found' })
     }
@@ -90,12 +90,23 @@ app.post('/login', async function(req, res, next) {
       // only personalized value that goes the jwt token
       let payload = { id: user.id }
       let token = jwt.sign(payload, jwtOptions.secretOrKey)
-      res.json({ msg: 'ok', token: token })
+      res.json({
+        msg: 'ok',
+        user: { name: user.name, email: user.email, token: token }
+      })
     } else {
       res.status(401).json({ msg: 'Password is incorrect' })
     }
   }
 })
+
+app.get(
+  '/check_session',
+  passport.authenticate('jwt', { session: false }),
+  function(req, res) {
+    res.json({ ok: true })
+  }
+)
 
 app.get(
   '/protected',

@@ -5,7 +5,13 @@ module.exports = (sequelize, DataTypes) => {
     {
       name: DataTypes.STRING,
       email: DataTypes.STRING,
-      password: DataTypes.STRING
+      password: DataTypes.STRING,
+      data: DataTypes.JSONB,
+      email_confirmed: DataTypes.BOOLEAN,
+      confirmation_key: DataTypes.STRING,
+      password: DataTypes.STRING,
+      active: DataTypes.BOOLEAN,
+      roles: DataTypes.ENUM('admin', 'member', 'guest')
     },
     {}
   )
