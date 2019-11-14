@@ -6,9 +6,9 @@ shout-outz:
 - [Express](https://expressjs.com/)
 - [passport-jwt](http://www.passportjs.org/packages/passport-jwt/)
 
-## devel
+## devel setup
 
-### DATABASE setup (PostgreSQL)
+### DATABASE (PostgreSQL)
 
 #### run migrations:
 
@@ -28,7 +28,9 @@ undo all seeds:
 undo specific seed:
 `npx sequelize-cli db:seed:undo --seed name-of-seed-as-in-data`
 
-#### misc:
+### MISC:
+
+getting started:
 
 `npm i -S body-parser express jsonwebtoken passport passport-jwt sequelize pg pg-hstore dotenv -D sequelize-cli`
 
