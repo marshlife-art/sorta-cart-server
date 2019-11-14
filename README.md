@@ -10,13 +10,13 @@ shout-outz:
 
 ### DATABASE (PostgreSQL)
 
-#### run migrations:
+#### run migrations
 
 `npm run db:migrate`
 
 `npm run db:migrate:undo:all`
 
-#### seeds:
+#### seeds
 
 `npx sequelize-cli seed:generate --name init-products`
 
@@ -28,13 +28,13 @@ undo all seeds:
 undo specific seed:
 `npx sequelize-cli db:seed:undo --seed name-of-seed-as-in-data`
 
-### MISC:
+### MISC
 
 getting started:
 
 `npm i -S body-parser express jsonwebtoken passport passport-jwt sequelize pg pg-hstore dotenv -D sequelize-cli`
 
-#### sequelize setup:
+#### sequelize setup
 
 `npx sequelize-cli model:generate --name User --attributes name:string,email:string`
 
