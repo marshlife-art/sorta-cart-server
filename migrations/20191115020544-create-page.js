@@ -2,38 +2,18 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface
-      .createTable('Users', {
+      .createTable('Pages', {
         id: {
           allowNull: false,
           autoIncrement: true,
           primaryKey: true,
           type: Sequelize.INTEGER
         },
-        name: {
+        href: {
           type: Sequelize.STRING
         },
-        email: {
-          allowNull: false,
-          type: Sequelize.STRING
-        },
-        email_confirmed: {
-          type: Sequelize.BOOLEAN
-        },
-        auth_key: {
-          type: Sequelize.STRING
-        },
-        password: {
-          type: Sequelize.STRING
-        },
-        active: {
-          type: Sequelize.BOOLEAN
-        },
-        roles: {
-          type: Sequelize.ARRAY(Sequelize.STRING)
-        },
-        data: {
-          type: Sequelize.JSONB,
-          defaultValue: {}
+        content: {
+          type: Sequelize.TEXT
         },
         createdAt: {
           allowNull: false,
@@ -47,13 +27,9 @@ module.exports = {
           onUpdate: Sequelize.literal('CURRENT_TIMESTAMP')
         }
       })
-      .then(() =>
-        queryInterface.addIndex('Users', ['email'], {
-          indicesType: 'UNIQUE'
-        })
-      )
+      .then(() => queryInterface.addIndex('Pages', ['href']))
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Users')
+    return queryInterface.dropTable('Pages')
   }
 }
