@@ -9,7 +9,7 @@ module.exports = {
           primaryKey: true,
           type: Sequelize.INTEGER
         },
-        href: {
+        slug: {
           type: Sequelize.STRING
         },
         content: {
@@ -27,7 +27,7 @@ module.exports = {
           onUpdate: Sequelize.literal('CURRENT_TIMESTAMP')
         }
       })
-      .then(() => queryInterface.addIndex('Pages', ['href']))
+      .then(() => queryInterface.addIndex('Pages', ['slug']))
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable('Pages')

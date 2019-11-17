@@ -17,11 +17,11 @@ module.exports = {
       'Pages',
       [
         {
-          href: '/',
+          slug: '/',
           content: '<b>hello world!</b>'
         },
         {
-          href: 'test',
+          slug: 'test',
           content: `# mark
 ## down
 

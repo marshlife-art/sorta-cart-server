@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
     {}
   )
   WholesaleOrder.associate = function(models) {
-    // associations can be defined here
     WholesaleOrder.hasMany(models.Order)
   }
   return WholesaleOrder

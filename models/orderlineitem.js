@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
     {}
   )
   OrderLineItem.associate = function(models) {
-    // associations can be defined here
     OrderLineItem.belongsTo(models.Order)
   }
   return OrderLineItem

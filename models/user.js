@@ -35,8 +35,8 @@ module.exports = (sequelize, DataTypes) => {
     return bcrypt.compareSync(password, this.password)
   }
 
-  User.associate = function(models) {
-    // associations can be defined here
-  }
+  // User.associate = function(models) {
+  //   // associations can be defined here
+  // }
   return User
 }

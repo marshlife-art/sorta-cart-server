@@ -63,13 +63,13 @@ const getUser = async obj => {
 
 // USER ROUTES
 
-app.get('/', function(req, res) {
-  res.json({ message: 'Express is up!' })
-})
+// app.get('/', function(req, res) {
+//   res.json({ message: 'Express is up!' })
+// })
 
-app.get('/users', function(req, res) {
-  getAllUsers().then(users => res.json(users))
-})
+// app.get('/users', function(req, res) {
+//   getAllUsers().then(users => res.json(users))
+// })
 
 app.post('/register', function(req, res, next) {
   const { name, email, password } = req.body
@@ -85,14 +85,19 @@ app.post('/login', async function(req, res, next) {
     if (!user) {
       res.status(401).json({ message: 'No such user found' })
     }
-    if (user.password === password) {
+    if (user.validPassword(password)) {
       // from now on we'll identify the user by the id and the id is the
       // only personalized value that goes the jwt token
       let payload = { id: user.id }
       let token = jwt.sign(payload, jwtOptions.secretOrKey)
       res.json({
         msg: 'ok',
-        user: { name: user.name, email: user.email, token: token }
+        user: {
+          name: user.name,
+          email: user.email,
+          roles: user.roles,
+          token: token
+        }
       })
     } else {
       res.status(401).json({ msg: 'Password is incorrect' })
@@ -103,8 +108,13 @@ app.post('/login', async function(req, res, next) {
 app.get(
   '/check_session',
   passport.authenticate('jwt', { session: false }),
-  function(req, res) {
-    res.json({ ok: true })
+  async function(req, res) {
+    const reqUser = await req.user
+    const user = reqUser.dataValues
+    res.json({
+      msg: 'ok',
+      user: { name: user.name, email: user.email, roles: user.roles }
+    })
   }
 )
 
@@ -115,6 +125,20 @@ app.get(
     res.json('Success! You can now see this without a token.')
   }
 )
+
+const Page = models.Page
+
+const getPage = async slug => {
+  return await Page.findOne({ where: { slug: slug } })
+}
+
+app.get('/page', function(req, res) {
+  getPage(req.query.slug)
+    .then(page => {
+      res.json(page)
+    })
+    .catch(err => res.status(404).json({ error: true, msg: 'not found' }))
+})
 
 const Product = models.Product
 
