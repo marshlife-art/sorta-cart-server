@@ -38,9 +38,6 @@ module.exports = {
         notes: {
           type: Sequelize.STRING
         },
-        line_items: {
-          type: Sequelize.JSONB
-        },
         history: {
           type: Sequelize.JSONB
         },

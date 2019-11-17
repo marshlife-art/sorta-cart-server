@@ -12,13 +12,13 @@ module.exports = (sequelize, DataTypes) => {
       phone: DataTypes.STRING,
       address: DataTypes.STRING,
       notes: DataTypes.STRING,
-      line_items: DataTypes.JSONB,
       history: DataTypes.JSONB
     },
     {}
   )
   Order.associate = function(models) {
     // associations can be defined here
+    Order.hasMany(models.OrderLineItem)
   }
   return Order
 }
