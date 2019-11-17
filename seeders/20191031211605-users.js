@@ -1,4 +1,5 @@
 'use strict'
+const models = require('../models')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -7,30 +8,12 @@ module.exports = {
       Return a promise to correctly handle asynchronicity.
     */
 
-    return queryInterface.bulkInsert(
-      'Users',
-      [
-        {
-          name: 'admin',
-          email: 'admin@marshcoop.org',
-          password: 'zomgzomg',
-          roles: ['admin']
-        },
-        {
-          name: 'member',
-          email: 'member@marshcoop.org',
-          password: 'zomgzomg',
-          roles: ['member']
-        },
-        {
-          name: 'guest',
-          email: 'guest@marshcoop.org',
-          password: 'zomgzomg',
-          roles: ['guest']
-        }
-      ],
-      {}
-    )
+    return models.User.create({
+      name: 'admin',
+      email: 'admin@marshcoop.org',
+      password: 'zomgzomg',
+      roles: ['admin']
+    })
   },
 
   down: (queryInterface, Sequelize) => {
