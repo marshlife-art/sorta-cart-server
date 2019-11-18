@@ -142,40 +142,68 @@ app.get('/page', function(req, res) {
 
 const Product = models.Product
 
-const getProducts = async (limit, page, orderBy, orderDirection, q) => {
+const getProducts = async query => {
+  console.log('getProducts query:', query)
+  const limit = query.pageSize || 50
+  const page = query.page || 0
+  const orderBy = query.orderBy && query.orderBy.field
+  const orderDirection = query.orderDirection
+  const q = query.search || ''
+  console.log('getProducts fuckin Q:', q)
   let findParams = {
     offset: page * limit,
-    limit: limit
+    limit: limit,
+    where: { [Op.and]: [] }
   }
   if (orderBy) {
     findParams.order = [[orderBy, orderDirection]]
   }
   if (q) {
     // category sub_category name description
-    findParams.where = {
-      [Op.or]: [
-        { name: { [Op.iLike]: `%${q}%` } },
-        { description: { [Op.iLike]: `%${q}%` } },
-        { sub_category: { [Op.iLike]: `%${q}%` } },
-        { category: { [Op.iLike]: `%${q}%` } }
-      ]
+    findParams.where[Op.or] = [
+      { name: { [Op.iLike]: `%${q}%` } },
+      { description: { [Op.iLike]: `%${q}%` } },
+      { sub_category: { [Op.iLike]: `%${q}%` } },
+      { category: { [Op.iLike]: `%${q}%` } }
+    ]
+  }
+
+  if (query.filters && query.filters.length) {
+    for (i = 0; i < query.filters.length; i++) {
+      const filter = query.filters[i]
+      if (filter.column.field && filter.value && filter.value.length) {
+        if (filter.column.field === 'codes') {
+          for (j = 0; j < filter.value.length; j++) {
+            findParams.where[Op.and].push({
+              codes: { [Op.iLike]: `%${filter.value[j]}%` }
+            })
+          }
+        } else {
+          for (j = 0; j < filter.value.length; j++) {
+            findParams.where[Op.and].push({
+              [filter.column.field]: filter.value[j]
+            })
+          }
+        }
+      }
     }
   }
-  console.log('findParams:', findParams)
+
+  if (!q && !(query.filters && query.filters.length)) {
+    console.log('deleteing WHERE :/')
+    delete findParams.where
+  }
+  console.log('products findParams:', JSON.stringify(findParams))
   return await Product.findAndCountAll(findParams)
 }
 
-app.get('/products', function(req, res) {
-  const limit = req.query.limit || 10
-  const page = req.query.page || 0
-  const orderBy = req.query.orderBy
-  const orderDirection = req.query.orderDirection
-  const q = req.query.q || ''
+app.post('/products', function(req, res) {
+  // console.log('/products req.body:', JSON.stringify(req.body))
 
-  getProducts(limit, page, orderBy, orderDirection, q).then(result =>
+  getProducts(req.body).then(result =>
     res.json({
       data: result.rows,
-      page: parseInt(page),
+      page: 0,
       totalCount: result.count
     })
   )
@@ -206,18 +234,6 @@ app.get('/sub_categories', function(req, res) {
             return acc
           }, {})
       )
-  )
-})
-
-app.post('/products', function(req, res) {
-  console.log('/products req.body:', JSON.stringify(req.body))
-
-  getProducts(100, 0).then(result =>
-    res.json({
-      data: result.rows,
-      page: 0,
-      totalCount: result.count
-    })
   )
 })
 

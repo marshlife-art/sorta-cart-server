@@ -1,0 +1,69 @@
+{
+  "filters": [
+    {
+      "column": {
+        "title": "category",
+        "field": "category",
+        "type": "string",
+        "filterPlaceholder": "filter",
+        "tableData": {
+          "columnOrder": 0,
+          "filterValue": ["BULK FOOD", "DAIRY", "MARSH"],
+          "groupSort": "asc",
+          "id": 0
+        }
+      },
+      "operator": "=",
+      "value": ["BULK FOOD", "DAIRY", "MARSH"]
+    },
+    {
+      "column": {
+        "title": "sub category",
+        "field": "sub_category",
+        "type": "string",
+        "filterPlaceholder": "filter",
+        "tableData": {
+          "columnOrder": 1,
+          "filterValue": ["REFRIGERATED, BEVERAGES"],
+          "groupSort": "asc",
+          "id": 1
+        }
+      },
+      "operator": "=",
+      "value": ["REFRIGERATED, BEVERAGES"]
+    },
+    {
+      "column": {
+        "title": "unit type",
+        "field": "unit_type",
+        "type": "string",
+        "filterPlaceholder": "filter",
+        "tableData": {
+          "columnOrder": 6,
+          "filterValue": ["EA"],
+          "groupSort": "asc",
+          "id": 6
+        }
+      },
+      "operator": "=",
+      "value": ["EA"]
+    }
+  ],
+  "orderBy": {
+    "title": "unit type",
+    "field": "unit_type",
+    "type": "string",
+    "filterPlaceholder": "filter",
+    "tableData": {
+      "columnOrder": 6,
+      "filterValue": ["EA"],
+      "groupSort": "asc",
+      "id": 6
+    }
+  },
+  "orderDirection": "asc",
+  "page": 0,
+  "pageSize": 50,
+  "search": "bulk",
+  "totalCount": 1813
+}
