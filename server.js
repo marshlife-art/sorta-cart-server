@@ -153,7 +153,7 @@ const getProducts = async query => {
   let findParams = {
     offset: page * limit,
     limit: limit,
-    where: { [Op.and]: [] }
+    where: { [Op.or]: [] }
   }
   if (orderBy) {
     findParams.order = [[orderBy, orderDirection]]
@@ -169,24 +169,22 @@ const getProducts = async query => {
   }
 
   if (query.filters && query.filters.length) {
-    for (i = 0; i < query.filters.length; i++) {
-      const filter = query.filters[i]
+    // map all filters into a buncha WHEREz ¯\_(ツ)_/¯
+    const filters = query.filters.map(filter => {
       if (filter.column.field && filter.value && filter.value.length) {
         if (filter.column.field === 'codes') {
-          for (j = 0; j < filter.value.length; j++) {
-            findParams.where[Op.and].push({
-              codes: { [Op.iLike]: `%${filter.value[j]}%` }
-            })
-          }
+          return filter.value.map(val => ({
+            codes: { [Op.iLike]: `%${val}%` }
+          }))
         } else {
-          for (j = 0; j < filter.value.length; j++) {
-            findParams.where[Op.and].push({
-              [filter.column.field]: filter.value[j]
-            })
-          }
+          return filter.value.map(val => ({
+            [filter.column.field]: val
+          }))
         }
       }
-    }
+    })
+
+    filters && findParams.where[Op.or].push({ [Op.and]: filters })
   }
 
   if (!q && !(query.filters && query.filters.length)) {
@@ -203,7 +201,7 @@ app.post('/products', function(req, res) {
   getProducts(req.body).then(result =>
     res.json({
       data: result.rows,
-      page: 0,
+      page: req.body && req.body.page ? req.body.page : 0,
       totalCount: result.count
     })
   )
