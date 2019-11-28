@@ -1,29 +1,32 @@
 version: '3'
 services:
-  # web:
-  #   build: .
-  #   ports:
-  #     - "8080:8080"
-  #   volumes:
-  #     - .:/code
-  #     - logvolume01:/var/log
-  #   links:
-  #     - pg
-  #   network_mode: bridge
-  #   environment:
-  #     - PG_DATABASE_NAME=${PG_DATABASE_NAME}
-  #     - PG_DATABASE_USER=${PG_DATABASE_USER}
-  #     - PG_DATABASE_PASSWORD=${PG_DATABASE_PASSWORD}
-  #     - MAILGUN_API_KEY=key-
-  #     - MAILGUN_DOMAIN=mg.marshlife-art.org
-  #     - MAIL_GOES_TO=hello@marshlife-art.org
-  #     - VIRTUAL_HOST=http://marsh.ifitis.org
+  api:
+    build: .
+    image: 3dwardsharp/sorta-cart-server:latest
+    # restart: always
+    ports:
+      - '3000:3000'
+    volumes:
+      - logvolume01:/var/log
+    links:
+      - pg
+    network_mode: bridge
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - JWT_SECRET=${JWT_SECRET}
+      - PG_DATABASE_NAME=${PG_DATABASE_NAME}
+      - PG_DATABASE_USER=${PG_DATABASE_USER}
+      - PG_DATABASE_PASSWORD=${PG_DATABASE_PASSWORD}
+      - PG_DATABASE_HOST=pg
+      - MAILGUN_API_KEY=${MAILGUN_API_KEY}
+      - MAILGUN_DOMAIN=mg.marshcoop.org
+      - MAIL_GOES_TO=hello@marshcoop.org
   pg:
     image: postgres:12-alpine
     # restart: always
     network_mode: bridge
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       POSTGRES_USER: ${PG_DATABASE_USER}
       POSTGRES_PASSWORD: ${PG_DATABASE_PASSWORD}
