@@ -149,11 +149,10 @@ const getProducts = async query => {
   const orderBy = query.orderBy && query.orderBy.field
   const orderDirection = query.orderDirection
   const q = query.search || ''
-  console.log('getProducts fuckin Q:', q)
   let findParams = {
     offset: page * limit,
     limit: limit,
-    where: { [Op.or]: [] }
+    where: {}
   }
   if (orderBy) {
     findParams.order = [[orderBy, orderDirection]]
@@ -169,29 +168,50 @@ const getProducts = async query => {
   }
 
   if (query.filters && query.filters.length) {
-    // map all filters into a buncha WHEREz ¯\_(ツ)_/¯
-    const filters = query.filters.map(filter => {
+    // map all filters into a buncha WHEREz
+    // ...this is pretty gnarly ¯\_(ツ)_/¯
+    query.filters.forEach(filter => {
       if (filter.column.field && filter.value && filter.value.length) {
         if (filter.column.field === 'codes') {
-          return filter.value.map(val => ({
+          let codeFilters = filter.value.map(val => ({
             codes: { [Op.iLike]: `%${val}%` }
           }))
-        } else {
-          return filter.value.map(val => ({
+          if (findParams.where[Op.or] && findParams.where[Op.or].length) {
+            findParams.where[Op.or].push(codeFilters)
+          } else {
+            findParams.where[Op.or] = codeFilters
+          }
+        } else if (
+          filter.column.field === 'category' ||
+          filter.column.field === 'sub_category'
+        ) {
+          let catFilters = filter.value.map(val => ({
             [filter.column.field]: val
           }))
+          if (findParams.where[Op.or] && findParams.where[Op.or].length) {
+            findParams.where[Op.or].push(catFilters)
+          } else {
+            findParams.where[Op.or] = catFilters
+          }
+        } else {
+          let filters = filter.value.map(val => ({
+            [filter.column.field]: val
+          }))
+          if (findParams.where[Op.and] && findParams.where[Op.and].length) {
+            findParams.where[Op.and].push(filters)
+          } else {
+            findParams.where[Op.and] = filters
+          }
         }
       }
     })
-
-    filters && findParams.where[Op.or].push({ [Op.and]: filters })
   }
 
-  if (!q && !(query.filters && query.filters.length)) {
-    console.log('deleteing WHERE :/')
-    delete findParams.where
-  }
-  console.log('products findParams:', JSON.stringify(findParams))
+  // if (!q && !(query.filters && query.filters.length)) {
+  //   console.log('deleteing WHERE :/')
+  //   delete findParams.where
+  // }
+  // console.log('products findParams:', JSON.stringify(findParams))
   return await Product.findAndCountAll(findParams)
 }
 
