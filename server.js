@@ -132,8 +132,20 @@ const getPage = async slug => {
   return await Page.findOne({ where: { slug: slug } })
 }
 
+const getAllPages = async slug => {
+  return await Page.findAndCountAll({ limit: 100, order: [['id', 'ASC']] })
+}
+
 app.get('/page', function(req, res) {
   getPage(req.query.slug)
+    .then(page => {
+      res.json(page)
+    })
+    .catch(err => res.status(404).json({ error: true, msg: 'not found' }))
+})
+
+app.get('/pages', function(req, res) {
+  getAllPages()
     .then(page => {
       res.json(page)
     })
