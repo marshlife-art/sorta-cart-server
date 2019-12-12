@@ -152,6 +152,34 @@ app.get('/pages', function(req, res) {
     .catch(err => res.status(404).json({ error: true, msg: 'not found' }))
 })
 
+const upsertPage = async ({ id, slug, content }) => {
+  return await Page.upsert({ id, slug, content })
+}
+
+app.post('/page', function(req, res) {
+  const { id, slug, content } = req.body
+  upsertPage({ id, slug, content })
+    .then(page => res.json({ page, msg: 'page saved successfully' }))
+    .catch(err =>
+      res.status(500).json({ error: true, msg: 'unable to save page' })
+    )
+})
+
+const destroyPage = async ({ id }) => {
+  return await Page.destroy({ where: { id: id } })
+}
+
+app.delete('/page', function(req, res) {
+  const { id } = req.body
+  destroyPage({ id })
+    .then(page => res.json({ page, msg: 'page destroyed!' }))
+    .catch(err =>
+      res
+        .status(500)
+        .json({ error: true, msg: `o noz! unable to destroy page ${err}` })
+    )
+})
+
 const Product = models.Product
 
 const getProducts = async query => {
