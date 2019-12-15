@@ -51,9 +51,9 @@ const createUser = async ({ name, email, password }) => {
   return await User.create({ name, email, password })
 }
 
-const getAllUsers = async () => {
-  return await User.findAll()
-}
+// const getAllUsers = async () => {
+//   return await User.findAll()
+// }
 
 const getUser = async obj => {
   return await User.findOne({
@@ -180,15 +180,13 @@ app.delete('/page', function(req, res) {
     )
 })
 
-const Product = models.Product
-
-const getProducts = async query => {
-  console.log('getProducts query:', query)
+const findParamsFor = query => {
+  console.log('findParamsFor query:', query)
   const limit = query.pageSize || 50
   const page = query.page || 0
   const orderBy = query.orderBy && query.orderBy.field
   const orderDirection = query.orderDirection
-  const q = query.search || ''
+
   let findParams = {
     offset: page * limit,
     limit: limit,
@@ -196,15 +194,6 @@ const getProducts = async query => {
   }
   if (orderBy) {
     findParams.order = [[orderBy, orderDirection]]
-  }
-  if (q) {
-    // category sub_category name description
-    findParams.where[Op.or] = [
-      { name: { [Op.iLike]: `%${q}%` } },
-      { description: { [Op.iLike]: `%${q}%` } },
-      { sub_category: { [Op.iLike]: `%${q}%` } },
-      { category: { [Op.iLike]: `%${q}%` } }
-    ]
   }
 
   if (query.filters && query.filters.length) {
@@ -233,7 +222,7 @@ const getProducts = async query => {
           } else {
             findParams.where[Op.or] = catFilters
           }
-        } else {
+        } else if (Array.isArray(filter.value)) {
           let filters = filter.value.map(val => ({
             [filter.column.field]: val
           }))
@@ -242,16 +231,66 @@ const getProducts = async query => {
           } else {
             findParams.where[Op.and] = filters
           }
+        } else {
+          findParams.where[filter.column.field] =
+            filter.column.field === 'roles' ? `{${filter.value}}` : filter.value
         }
       }
     })
   }
 
-  // if (!q && !(query.filters && query.filters.length)) {
-  //   console.log('deleteing WHERE :/')
-  //   delete findParams.where
-  // }
-  // console.log('products findParams:', JSON.stringify(findParams))
+  console.log(
+    'findParamsFor gonna return findParams:',
+    JSON.stringify(findParams)
+  )
+  return findParams
+}
+
+const getUsers = async query => {
+  let findParams = findParamsFor(query)
+
+  const q = query.search || ''
+  if (q) {
+    findParams.where[Op.or] = [
+      { name: { [Op.iLike]: `%${q}%` } },
+      { email: { [Op.iLike]: `%${q}%` } }
+    ]
+  }
+
+  return await User.findAndCountAll(findParams)
+}
+
+app.post('/users', passport.authenticate('jwt', { session: false }), function(
+  req,
+  res
+) {
+  // console.log('/products req.body:', JSON.stringify(req.body))
+
+  getUsers(req.body).then(result =>
+    res.json({
+      data: result.rows,
+      page: req.body && req.body.page ? req.body.page : 0,
+      totalCount: result.count
+    })
+  )
+})
+
+const Product = models.Product
+
+const getProducts = async query => {
+  let findParams = findParamsFor(query)
+
+  const q = query.search || ''
+  if (q) {
+    // category sub_category name description
+    findParams.where[Op.or] = [
+      { name: { [Op.iLike]: `%${q}%` } },
+      { description: { [Op.iLike]: `%${q}%` } },
+      { sub_category: { [Op.iLike]: `%${q}%` } },
+      { category: { [Op.iLike]: `%${q}%` } }
+    ]
+  }
+
   return await Product.findAndCountAll(findParams)
 }
 
