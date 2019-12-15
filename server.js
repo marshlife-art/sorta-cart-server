@@ -341,6 +341,40 @@ app.get('/sub_categories', function(req, res) {
   )
 })
 
+const Order = models.Order
+
+const getOrders = async query => {
+  let findParams = findParamsFor(query)
+
+  const q = query.search || ''
+  if (q) {
+    findParams.where[Op.or] = [
+      { name: { [Op.iLike]: `%${q}%` } },
+      { email: { [Op.iLike]: `%${q}%` } },
+      { phone: { [Op.iLike]: `%${q}%` } },
+      { address: { [Op.iLike]: `%${q}%` } },
+      { notes: { [Op.iLike]: `%${q}%` } }
+    ]
+  }
+
+  return await Order.findAndCountAll(findParams)
+}
+
+app.post('/orders', passport.authenticate('jwt', { session: false }), function(
+  req,
+  res
+) {
+  // console.log('/products req.body:', JSON.stringify(req.body))
+
+  getOrders(req.body).then(result =>
+    res.json({
+      data: result.rows,
+      page: req.body && req.body.page ? req.body.page : 0,
+      totalCount: result.count
+    })
+  )
+})
+
 app.listen(3000, function() {
   console.log('Express is running on port 3000')
 })
