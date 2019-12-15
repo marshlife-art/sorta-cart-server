@@ -47,8 +47,8 @@ const Op = models.Sequelize.Op
 const User = models.User
 
 // some helper functionz
-const createUser = async ({ name, email, password }) => {
-  return await User.create({ name, email, password })
+const createUser = async ({ email }) => {
+  return await User.create({ email })
 }
 
 // const getAllUsers = async () => {
@@ -72,10 +72,17 @@ const getUser = async obj => {
 // })
 
 app.post('/register', function(req, res, next) {
-  const { name, email, password } = req.body
-  createUser({ name, email, password }).then(user =>
-    res.json({ user, msg: 'account created successfully' })
-  )
+  const { email } = req.body
+  if (!email) {
+    res.json({ error: true, msg: 'no email!' })
+  } else {
+    createUser({ email })
+      .then(user =>
+        // #TODO: email user a registration link...
+        res.json({ user, msg: 'account created successfully' })
+      )
+      .catch(err => res.json({ error: true, msg: err }))
+  }
 })
 
 app.post('/login', async function(req, res, next) {
