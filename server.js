@@ -342,6 +342,7 @@ app.get('/sub_categories', function(req, res) {
 })
 
 const Order = models.Order
+const OrderLineItem = models.OrderLineItem
 
 const getOrders = async query => {
   let findParams = findParamsFor(query)
@@ -356,6 +357,15 @@ const getOrders = async query => {
       { notes: { [Op.iLike]: `%${q}%` } }
     ]
   }
+
+  findParams.include = [
+    {
+      model: OrderLineItem
+      // where: { state: Sequelize.col('order.state') }
+    }
+  ]
+
+  findParams.distinct = true
 
   return await Order.findAndCountAll(findParams)
 }
