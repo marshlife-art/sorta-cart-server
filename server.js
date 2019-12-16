@@ -291,6 +291,42 @@ app.post('/users', passport.authenticate('jwt', { session: false }), function(
   )
 })
 
+app.post(
+  '/user/role',
+  passport.authenticate('jwt', { session: false }),
+  function(req, res) {
+    const { id, role } = req.body
+    getUser({ id: id })
+      .then(user => {
+        user.roles = [role]
+        return user.save()
+      })
+      .then(user =>
+        // #TODO: email user a registration link...
+        res.json({ user, msg: 'role set successfully' })
+      )
+      .catch(err => res.json({ error: true, msg: err }))
+  }
+)
+
+const destroyUser = async ({ id }) => {
+  return await User.destroy({ where: { id: id } })
+}
+
+app.delete('/user', passport.authenticate('jwt', { session: false }), function(
+  req,
+  res
+) {
+  const { id } = req.body
+  destroyUser({ id })
+    .then(() => res.json({ msg: 'user destroyed!' }))
+    .catch(err =>
+      res
+        .status(500)
+        .json({ error: true, msg: `o noz! unable to destroy user ${err}` })
+    )
+})
+
 const Product = models.Product
 
 const getProducts = async query => {
