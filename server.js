@@ -151,7 +151,10 @@ app.get('/page', function(req, res) {
     .catch(err => res.status(404).json({ error: true, msg: 'not found' }))
 })
 
-app.get('/pages', function(req, res) {
+app.get('/pages', passport.authenticate('jwt', { session: false }), function(
+  req,
+  res
+) {
   getAllPages()
     .then(page => {
       res.json(page)
@@ -163,7 +166,10 @@ const upsertPage = async ({ id, slug, content }) => {
   return await Page.upsert({ id, slug, content })
 }
 
-app.post('/page', function(req, res) {
+app.post('/page', passport.authenticate('jwt', { session: false }), function(
+  req,
+  res
+) {
   const { id, slug, content } = req.body
   upsertPage({ id, slug, content })
     .then(page => res.json({ page, msg: 'page saved successfully' }))
@@ -176,7 +182,10 @@ const destroyPage = async ({ id }) => {
   return await Page.destroy({ where: { id: id } })
 }
 
-app.delete('/page', function(req, res) {
+app.delete('/page', passport.authenticate('jwt', { session: false }), function(
+  req,
+  res
+) {
   const { id } = req.body
   destroyPage({ id })
     .then(page => res.json({ page, msg: 'page destroyed!' }))
