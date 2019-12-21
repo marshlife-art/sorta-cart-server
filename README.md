@@ -12,6 +12,7 @@ use a `.env` file like such:
 
 ```sh
 NODE_ENV=development
+PORT=8080
 JWT_SECRET=
 PG_DATABASE_NAME=
 PG_DATABASE_USER=

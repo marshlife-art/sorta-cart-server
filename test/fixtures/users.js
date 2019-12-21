@@ -25,4 +25,10 @@ async function createUser(user) {
   return await models.User.create(user)
 }
 
-module.exports = { GUEST, MEMBER, ADMIN, createUser }
+async function createFakeUsers() {
+  await models.User.sync({ force: true, match: /_test$/, logging: false })
+  await models.User.create(GUEST)
+  await models.User.create(MEMBER)
+  await models.User.create(ADMIN)
+}
+module.exports = { GUEST, MEMBER, ADMIN, createUser, createFakeUsers }

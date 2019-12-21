@@ -22,7 +22,12 @@ const findParamsFor = query => {
     // map all filters into a buncha WHEREz
     // ...this is pretty gnarly ¯\_(ツ)_/¯
     query.filters.forEach(filter => {
-      if (filter.column.field && filter.value && filter.value.length) {
+      if (
+        filter.column &&
+        filter.column.field &&
+        filter.value &&
+        filter.value.length
+      ) {
         if (filter.column.field === 'codes') {
           let codeFilters = filter.value.map(val => ({
             codes: { [iLike]: `%${val}%` }
@@ -48,11 +53,10 @@ const findParamsFor = query => {
           let filters = filter.value.map(val => ({
             [filter.column.field]: val
           }))
-          if (findParams.where[Op.and] && findParams.where[Op.and].length) {
-            findParams.where[Op.and].push(filters)
-          } else {
-            findParams.where[Op.and] = filters
-          }
+          // if (findParams.where[Op.and] && findParams.where[Op.and].length) {
+          //   findParams.where[Op.and].push(filters)
+          // } else {findParams.where[Op.and] = filters}
+          findParams.where[Op.and] = filters
         } else {
           findParams.where[filter.column.field] =
             filter.column.field === 'roles' ? `{${filter.value}}` : filter.value

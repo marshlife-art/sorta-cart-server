@@ -41,7 +41,7 @@ function fakeProduct(i) {
     unit_type: 'CS',
     ws_price: 666.66,
     u_price: 66,
-    codes: 'a,b,c'
+    codes: `a,b,${i}c`
   }
 }
 

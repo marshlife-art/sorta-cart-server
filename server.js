@@ -42,6 +42,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 // init all the controllerz/routez:
 app.use('/', require('./controllers')(passport))
 
-app.listen(3000, function() {
-  console.log('Express is running on port 3000')
+const port = process.env.PORT || 3000
+app.listen(port, function() {
+  console.log(`sorta-cart-server is running on port ${port}`)
 })

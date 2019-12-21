@@ -10,7 +10,14 @@ describe('models', function() {
       await models.User.sync({ force: true, match: /_test$/, logging: false })
     })
 
-    it('should create users', async function() {
+    it('should just take an email', async function() {
+      const email = 'ohai@zomg.gov'
+      const user = await createUser({ email })
+      assert.equal(user.email, email)
+      assert.equal(user.roles, undefined)
+    })
+
+    it('should create GUEST users', async function() {
       const user = await createUser(GUEST)
 
       assert.equal(user.name, GUEST.name)
@@ -34,6 +41,15 @@ describe('models', function() {
 
       assert.notEqual(old_pass, admin.password)
       assert.notEqual(admin.password, 'somenewpassword')
+    })
+
+    it('can update a user', async function() {
+      const guest = await models.User.findOne({ where: { email: GUEST.email } })
+      const old_email = guest.email
+      guest.email = 'imma@gu.est'
+      await guest.save()
+      assert.notEqual(guest.email, old_email)
+      assert.equal(guest.email, 'imma@gu.est')
     })
   })
 })
