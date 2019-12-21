@@ -30,4 +30,19 @@ const getCategories = async () =>
 const getSubCategories = async () =>
   Product.aggregate('sub_category', 'DISTINCT', { plain: false })
 
-module.exports = { getProducts, getCategories, getSubCategories }
+const destroyProducts = async ids => {
+  return await Product.destroy({
+    where: {
+      id: {
+        [Op.or]: ids
+      }
+    }
+  })
+}
+
+module.exports = {
+  getProducts,
+  getCategories,
+  getSubCategories,
+  destroyProducts
+}

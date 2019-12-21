@@ -2,7 +2,8 @@ const assert = require('assert')
 const {
   getProducts,
   getCategories,
-  getSubCategories
+  getSubCategories,
+  destroyProducts
 } = require('../../services/product')
 const { createFakeProducts } = require('../fixtures/products')
 
@@ -84,6 +85,18 @@ describe('services', function() {
     it('should get a distinct list of sub categories', async function() {
       const subcatz = await getSubCategories()
       assert.equal(subcatz.length, 5)
+    })
+
+    it('should destroy products', async function() {
+      const products = await getProducts({
+        pageSize: 5
+      })
+      const ids = products.rows.map(p => p.id)
+      assert.equal(ids.length, 5)
+
+      await destroyProducts(ids)
+      const productsAfterDestroy = await getProducts({})
+      assert.equal(productsAfterDestroy.count, FAKE_PRODUCT_COUNT - 5)
     })
   })
 })
