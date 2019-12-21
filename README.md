@@ -2,9 +2,23 @@
 
 shout-outz:
 
-- [Sequelize](https://sequelize.org/)
 - [Express](https://expressjs.com/)
 - [passport-jwt](http://www.passportjs.org/packages/passport-jwt/)
+- [Sequelize](https://sequelize.org/)
+
+## ENV variables
+
+use a `.env` file like such:
+
+```sh
+NODE_ENV=development
+JWT_SECRET=
+PG_DATABASE_NAME=
+PG_DATABASE_USER=
+PG_DATABASE_PASSWORD=
+PG_DATABASE_HOST=
+MAILGUN_API_KEY=
+```
 
 ## devel setup
 

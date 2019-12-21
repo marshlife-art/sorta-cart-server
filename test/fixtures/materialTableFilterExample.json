@@ -47,6 +47,43 @@
       },
       "operator": "=",
       "value": ["EA"]
+    },
+    {
+      "column": {
+        "title": "properties",
+        "field": "codes",
+        "type": "string",
+        "lookup": {
+          "1": "100% organic",
+          "2": "95%+ organic",
+          "3": "70%+ organic",
+          "a": "Artificial ingredients",
+          "c": "Low carb",
+          "d": "Dairy free",
+          "f": "Food Service items",
+          "g": "Gluten free",
+          "k": "Kosher",
+          "l": "Low sodium/no salt",
+          "m": "Non-GMO Project Verified",
+          "og": "Organic",
+          "r": "Refined sugar",
+          "v": "Vegan",
+          "w": "Wheat free",
+          "ft": "Fair Trade",
+          "n": "Natural",
+          "s": "Specialty Only",
+          "y": "Yeast free"
+        },
+        "filterPlaceholder": "filter",
+        "tableData": {
+          "columnOrder": 9,
+          "filterValue": ["2", "3"],
+          "groupSort": "asc",
+          "id": 9
+        }
+      },
+      "operator": "=",
+      "value": ["2", "3"]
     }
   ],
   "orderBy": {
