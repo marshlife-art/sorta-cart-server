@@ -6,7 +6,7 @@ const getPage = async slug => {
   return await Page.findOne({ where: { slug: slug } })
 }
 
-const getAllPages = async slug => {
+const getAllPages = async () => {
   return await Page.findAndCountAll({ limit: 100, order: [['id', 'ASC']] })
 }
 
