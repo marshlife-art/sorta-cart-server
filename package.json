@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "NODE_ENV=test nyc --reporter=text --reporter=html mocha --recursive",
+    "test": "NODE_ENV=test nyc --reporter=text --reporter=html mocha --recursive && nyc report --reporter=text > coverage.txt",
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all",
     "db:seed:all": "sequelize-cli db:seed:all"

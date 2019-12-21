@@ -3,3 +3,4 @@
 .env
 *.csv
 .nyc_output
+coverage/
