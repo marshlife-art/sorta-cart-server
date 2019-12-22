@@ -44,4 +44,11 @@ const getOrder = async id => {
   })
 }
 
-module.exports = { getOrders, getOrder }
+const createOrder = async order => {
+  delete order.id
+  delete order.createdAt
+  delete order.updatedAt
+  return await Order.create(order, { include: [models.OrderLineItem] })
+}
+
+module.exports = { getOrders, getOrder, createOrder }

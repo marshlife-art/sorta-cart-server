@@ -1,14 +1,12 @@
 const router = require('express').Router()
 
-const { getOrders, getOrder } = require('../services/order')
+const { getOrders, getOrder, createOrder } = require('../services/order')
 
 module.exports = function(passport) {
   router.post(
     '/orders',
     passport.authenticate('jwt', { session: false }),
     function(req, res) {
-      // console.log('/products req.body:', JSON.stringify(req.body))
-
       getOrders(req.body).then(result =>
         res.json({
           data: result.rows,
@@ -28,6 +26,22 @@ module.exports = function(passport) {
         .then(order => res.json(order))
         .catch(err =>
           res.status(500).json({ error: true, msg: 'unable to get order' })
+        )
+    }
+  )
+
+  router.post(
+    '/order/create',
+    passport.authenticate('jwt', { session: false }),
+    function(req, res) {
+      console.log('/order/create req.body:', JSON.stringify(req.body))
+
+      createOrder(req.body)
+        .then(order => res.json({ success: true, msg: 'ok', order: order }))
+        .catch(err =>
+          res
+            .status(500)
+            .json({ error: true, msg: `unable to create order err: ${err}` })
         )
     }
   )
