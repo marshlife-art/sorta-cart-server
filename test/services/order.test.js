@@ -1,5 +1,5 @@
 const assert = require('assert')
-const { getOrders } = require('../../services/order')
+const { getOrders, getOrder } = require('../../services/order')
 const { createFakerOrders } = require('../fixtures/orders')
 
 const FAKE_ORDER_COUNT = 10
@@ -22,6 +22,14 @@ describe('services', function() {
       })
       assert.equal(orders.count, 1)
       assert.equal(orders.rows.length, 1)
+    })
+
+    it('should be able to find one order', async function() {
+      const orders = await getOrders({ pageSize: 1 })
+      assert.equal(orders.rows.length, 1)
+
+      const order = await getOrder(orders.rows[0].id)
+      assert.equal(order.id, orders.rows[0].id)
     })
   })
 })

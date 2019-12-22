@@ -33,4 +33,15 @@ const getOrders = async query => {
   return await Order.findAndCountAll(findParams)
 }
 
-module.exports = { getOrders }
+const getOrder = async id => {
+  return await Order.findOne({
+    where: { id },
+    include: [
+      {
+        model: OrderLineItem
+      }
+    ]
+  })
+}
+
+module.exports = { getOrders, getOrder }

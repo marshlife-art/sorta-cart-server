@@ -1,6 +1,6 @@
 const router = require('express').Router()
 
-const { getOrders } = require('../services/order')
+const { getOrders, getOrder } = require('../services/order')
 
 module.exports = function(passport) {
   router.post(
@@ -16,6 +16,19 @@ module.exports = function(passport) {
           totalCount: result.count
         })
       )
+    }
+  )
+
+  router.get(
+    '/order/edit/:id',
+    passport.authenticate('jwt', { session: false }),
+    function(req, res) {
+      const id = req.params.id
+      getOrder(id)
+        .then(order => res.json(order))
+        .catch(err =>
+          res.status(500).json({ error: true, msg: 'unable to get order' })
+        )
     }
   )
 
