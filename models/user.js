@@ -5,15 +5,16 @@ module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
     'User',
     {
-      name: DataTypes.STRING,
       email: DataTypes.STRING,
+      role: DataTypes.STRING,
+      name: DataTypes.STRING,
       password: DataTypes.STRING,
-      data: DataTypes.JSONB,
+      phone: DataTypes.STRING,
+      address: DataTypes.STRING,
       email_confirmed: DataTypes.BOOLEAN,
       auth_key: DataTypes.STRING,
-      password: DataTypes.STRING,
       active: DataTypes.BOOLEAN,
-      roles: DataTypes.ENUM('admin', 'member', 'guest')
+      data: DataTypes.JSONB
     },
     {
       hooks: {
@@ -35,8 +36,8 @@ module.exports = (sequelize, DataTypes) => {
     return bcrypt.compareSync(password, this.password)
   }
 
-  // User.associate = function(models) {
-  //   // associations can be defined here
-  // }
+  User.associate = function(models) {
+    User.hasMany(models.Order)
+  }
   return User
 }

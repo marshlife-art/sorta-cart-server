@@ -34,6 +34,7 @@ const KNOWN_HEADERS = [
   'unit_type',
   'ws_price',
   'u_price',
+  'category',
   'sub_category',
   ...CODE_COLZ
 ]
@@ -49,7 +50,10 @@ const HEADER_MAP = {
   'Category Description': 'sub_category'
 }
 
-module.exports = csv_path => {
+module.exports = (csv_path, import_tag, vendor) => {
+  import_tag = import_tag || `import${Date.now()}`
+  vendor = vendor || 'default'
+
   return new Promise(function(resolve, reject) {
     const results = []
     let cat = ''
@@ -67,6 +71,7 @@ module.exports = csv_path => {
       )
       .on('data', data => {
         if (data['upc_code'] === '' && data['name'] === '' && data['unf']) {
+          // if the first and only field is something, then it's probably a category.
           cat = data['unf']
         } else if (Object.values(data).filter(String).length) {
           data['category'] = cat
@@ -90,13 +95,16 @@ module.exports = csv_path => {
             u_price && !isNaN(parseFloat(u_price)) ? parseFloat(u_price) : 0
           const pk = data['pk'].replace(',', '')
           data['pk'] = pk && !isNaN(parseInt(pk)) ? parseInt(pk) : 0
+
+          data['import_tag'] = import_tag
+          data['vendor'] = vendor
           results.push(data)
         }
       })
       .on('end', () => {
         console.log('done reading csv, results.length:', results.length)
 
-        models.Product.bulkCreate(results).then(_ => resolve())
+        models.Product.bulkCreate(results).then(resolve)
       })
       .on('error', reject)
   })

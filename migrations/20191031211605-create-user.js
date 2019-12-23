@@ -9,11 +9,14 @@ module.exports = {
           primaryKey: true,
           type: Sequelize.INTEGER
         },
-        name: {
-          type: Sequelize.STRING
-        },
         email: {
           allowNull: false,
+          type: Sequelize.STRING
+        },
+        role: {
+          type: Sequelize.STRING
+        },
+        name: {
           type: Sequelize.STRING
         },
         email_confirmed: {
@@ -28,8 +31,11 @@ module.exports = {
         active: {
           type: Sequelize.BOOLEAN
         },
-        roles: {
-          type: Sequelize.ARRAY(Sequelize.STRING)
+        phone: {
+          type: Sequelize.STRING
+        },
+        address: {
+          type: Sequelize.STRING
         },
         data: {
           type: Sequelize.JSONB,
@@ -52,6 +58,7 @@ module.exports = {
           indicesType: 'UNIQUE'
         })
       )
+      .then(() => queryInterface.addIndex('Users', ['role']))
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable('Users')

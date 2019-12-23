@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     {}
   )
   Order.associate = function(models) {
+    Order.belongsTo(models.User)
     Order.hasMany(models.OrderLineItem, { onDelete: 'cascade', hooks: true })
   }
   return Order

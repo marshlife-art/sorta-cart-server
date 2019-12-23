@@ -46,6 +46,12 @@ module.exports = {
         codes: {
           type: Sequelize.STRING
         },
+        vendor: {
+          type: Sequelize.STRING
+        },
+        import_tag: {
+          type: Sequelize.STRING
+        },
         createdAt: {
           allowNull: false,
           type: Sequelize.DATE,
@@ -62,6 +68,7 @@ module.exports = {
       .then(() => queryInterface.addIndex('Products', ['sub_category']))
       .then(() => queryInterface.addIndex('Products', ['ws_price']))
       .then(() => queryInterface.addIndex('Products', ['u_price']))
+      .then(() => queryInterface.addIndex('Products', ['import_tag']))
       .then(() =>
         queryInterface.addIndex('Products', ['unf'], {
           indicesType: 'UNIQUE'

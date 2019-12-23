@@ -3,6 +3,7 @@ const models = require('../models')
 
 const Order = models.Order
 const OrderLineItem = models.OrderLineItem
+const User = models.User
 const Op = models.Sequelize.Op
 // using sqlite in test env so no iLike :/
 const iLike = process.env.NODE_ENV === 'test' ? Op.like : Op.iLike
@@ -24,7 +25,9 @@ const getOrders = async query => {
   findParams.include = [
     {
       model: OrderLineItem
-      // where: { state: Sequelize.col('order.state') }
+    },
+    {
+      model: User
     }
   ]
 
@@ -39,6 +42,9 @@ const getOrder = async id => {
     include: [
       {
         model: OrderLineItem
+      },
+      {
+        model: User
       }
     ]
   })

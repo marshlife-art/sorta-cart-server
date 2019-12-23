@@ -1,4 +1,5 @@
 const models = require('../../models')
+const { MEMBER, createUser } = require('../fixtures/users')
 
 const ORDER = {
   status: 'new',
@@ -24,6 +25,7 @@ const ORDER = {
 function fakeOrder(i) {
   return {
     status: 'new',
+    UserId: 1,
     name: `${i}fake name`,
     email: `${i}@fake.email`,
     phone: `${i}000000000`,
@@ -34,6 +36,11 @@ function fakeOrder(i) {
 
 async function syncOrders() {
   await models.Order.sync({ force: true, match: /_test$/, logging: false })
+  await models.User.sync({
+    force: true,
+    match: /_test$/,
+    logging: false
+  })
   await models.WholesaleOrder.sync({
     force: true,
     match: /_test$/,
@@ -51,6 +58,7 @@ async function createOrder(sync, order) {
 
   if (sync) {
     await syncOrders()
+    await createUser(MEMBER)
   }
 
   return await models.Order.create(order, {
@@ -62,6 +70,7 @@ async function createFakerOrders(sync, howMany) {
   howMany = howMany || 1
   if (sync) {
     await syncOrders()
+    await createUser(MEMBER)
   }
 
   for (let i = 0; i < howMany; i++) {

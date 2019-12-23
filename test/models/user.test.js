@@ -14,7 +14,7 @@ describe('models', function() {
       const email = 'ohai@zomg.gov'
       const user = await createUser({ email })
       assert.equal(user.email, email)
-      assert.equal(user.roles, undefined)
+      assert.equal(user.role, undefined)
     })
 
     it('should create GUEST users', async function() {
@@ -22,7 +22,7 @@ describe('models', function() {
 
       assert.equal(user.name, GUEST.name)
       assert.equal(user.email, GUEST.email)
-      assert.equal(user.roles, GUEST.roles)
+      assert.equal(user.role, GUEST.role)
     })
 
     it('should hash password', async function() {

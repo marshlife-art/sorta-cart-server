@@ -4,19 +4,19 @@ const GUEST = {
   name: 'guest',
   email: 'guest@marshcoop.org',
   password: 'zomgzomg',
-  roles: ['guest']
+  role: 'guest'
 }
 const MEMBER = {
   name: 'some member',
   email: 'a@mem.ber',
   password: 'immamember',
-  roles: ['member']
+  role: 'member'
 }
 const ADMIN = {
   name: 'admin',
   email: 'admin@marshcoop.org',
   password: 'zomgzomg',
-  roles: ['admin']
+  role: 'admin'
 }
 
 async function createUser(user) {

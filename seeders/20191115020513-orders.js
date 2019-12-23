@@ -31,16 +31,29 @@ module.exports = {
     return models.Order.create(
       {
         status: 'new',
+        payment_status: 'balance_due',
+        shipment_status: 'backorder',
         name: 'fooz line itemz',
         email: 'line@it.emz',
         phone: '1234567890',
+        address: '666 Devel Dr. NY, NY 16666',
         notes: 'is test',
         total: 66.66,
+        UserId: 1,
         OrderLineItems: [
           {
-            quantity: 10,
-            total: 60.0,
-            kind: 'product'
+            quantity: 9,
+            description: 'some product',
+            total: 50.0,
+            kind: 'product',
+            vendor: 'test'
+          },
+          {
+            quantity: 1,
+            description: 'some other product',
+            total: 10.0,
+            kind: 'product',
+            vendor: 'test'
           },
           {
             quantity: 1,

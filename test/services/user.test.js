@@ -13,22 +13,21 @@ describe('services', function() {
       return createFakeUsers()
     })
 
-    // #TODO: rework roles/role column...
-    // it('should filter users by role', async function() {
-    //   const admins = await getUsers({
-    //     filters: [
-    //       {
-    //         column: {
-    //           field: 'roles'
-    //         },
-    //         // note: NOT an array
-    //         value: 'admin'
-    //       }
-    //     ]
-    //   })
-    //   assert.equal(admins.count, 1)
-    //   assert.equal(admins.rows.length, 1)
-    // })
+    it('should filter users by role', async function() {
+      const admins = await getUsers({
+        filters: [
+          {
+            column: {
+              field: 'role'
+            },
+            // note: NOT an array
+            value: 'admin'
+          }
+        ]
+      })
+      assert.equal(admins.count, 1)
+      assert.equal(admins.rows.length, 1)
+    })
 
     it('should filter with search query', async function() {
       const admins = await getUsers({
@@ -47,6 +46,29 @@ describe('services', function() {
             },
             // note: NOT an array
             value: 'some member'
+          }
+        ]
+      })
+      assert.equal(some_member.count, 1)
+      assert.equal(some_member.rows.length, 1)
+    })
+
+    it('should filter users by multiple colz', async function() {
+      const some_member = await getUsers({
+        filters: [
+          {
+            column: {
+              field: 'name'
+            },
+            // note: NOT an array
+            value: 'some member'
+          },
+          {
+            column: {
+              field: 'role'
+            },
+            // note: IS an array
+            value: ['member']
           }
         ]
       })

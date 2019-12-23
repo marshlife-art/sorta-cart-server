@@ -8,17 +8,20 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      quantity: {
-        type: Sequelize.INTEGER
+      vendor: {
+        type: Sequelize.STRING
       },
-      unique_item_count: {
-        type: Sequelize.INTEGER
+      notes: {
+        type: Sequelize.STRING
       },
-      total: {
-        type: Sequelize.DECIMAL(10, 2)
+      status: {
+        type: Sequelize.STRING
       },
-      data: {
-        type: Sequelize.JSONB
+      payment_status: {
+        type: Sequelize.STRING
+      },
+      shipment_status: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,

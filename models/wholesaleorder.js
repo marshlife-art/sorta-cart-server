@@ -3,15 +3,16 @@ module.exports = (sequelize, DataTypes) => {
   const WholesaleOrder = sequelize.define(
     'WholesaleOrder',
     {
-      quantity: DataTypes.INTEGER,
-      unique_item_count: DataTypes.INTEGER,
-      total: DataTypes.DECIMAL(10, 2),
-      data: DataTypes.JSONB
+      vendor: DataTypes.STRING,
+      notes: DataTypes.STRING,
+      status: DataTypes.STRING,
+      payment_status: DataTypes.STRING,
+      shipment_status: DataTypes.STRING
     },
     {}
   )
   WholesaleOrder.associate = function(models) {
-    WholesaleOrder.hasMany(models.Order)
+    WholesaleOrder.hasMany(models.OrderLineItem)
   }
   return WholesaleOrder
 }

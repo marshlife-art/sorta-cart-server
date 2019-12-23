@@ -17,6 +17,13 @@ module.exports = {
           },
           onDelete: 'CASCADE'
         },
+        WholesaleOrderId: {
+          type: Sequelize.INTEGER,
+          references: {
+            model: 'WholesaleOrders',
+            key: 'id'
+          }
+        },
         quantity: {
           type: Sequelize.INTEGER
         },
@@ -24,6 +31,9 @@ module.exports = {
           type: Sequelize.DECIMAL(10, 2)
         },
         kind: {
+          type: Sequelize.STRING
+        },
+        vendor: {
           type: Sequelize.STRING
         },
         data: {

@@ -24,7 +24,7 @@ module.exports = function(passport) {
       const { id, role } = req.body
       getUser({ id: id })
         .then(user => {
-          user.roles = [role]
+          user.role = role
           return user.save()
         })
         .then(user =>

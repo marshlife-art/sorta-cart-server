@@ -58,8 +58,7 @@ const findParamsFor = query => {
           // } else {findParams.where[Op.and] = filters}
           findParams.where[Op.and] = filters
         } else {
-          findParams.where[filter.column.field] =
-            filter.column.field === 'roles' ? `{${filter.value}}` : filter.value
+          findParams.where[filter.column.field] = filter.value
         }
       }
     })
