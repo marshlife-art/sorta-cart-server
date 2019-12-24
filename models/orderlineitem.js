@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       total: DataTypes.DECIMAL(10, 2),
       kind: DataTypes.STRING,
       vendor: DataTypes.STRING,
+      selected_unit: DataTypes.STRING,
       data: DataTypes.JSONB
     },
     {}

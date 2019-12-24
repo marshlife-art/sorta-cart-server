@@ -43,6 +43,12 @@ module.exports = {
         u_price: {
           type: Sequelize.DECIMAL(10, 2)
         },
+        ws_price_markup: {
+          type: Sequelize.DECIMAL(10, 2)
+        },
+        u_price_markup: {
+          type: Sequelize.DECIMAL(10, 2)
+        },
         codes: {
           type: Sequelize.STRING
         },

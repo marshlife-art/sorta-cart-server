@@ -36,6 +36,9 @@ module.exports = {
         vendor: {
           type: Sequelize.STRING
         },
+        selected_unit: {
+          type: Sequelize.STRING
+        },
         data: {
           type: Sequelize.JSONB
         },

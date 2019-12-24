@@ -3,8 +3,9 @@
 const loadProductsCSV = require('../util/loadProductsCSV')
 
 module.exports = {
-  up: (queryInterface, Sequelize) => {
-    return loadProductsCSV('seeders/products.csv')
+  up: async (queryInterface, Sequelize) => {
+    const products = await loadProductsCSV('seeders/products.csv')
+    return queryInterface.bulkInsert('Products', products)
   },
 
   down: (queryInterface, Sequelize) => {
