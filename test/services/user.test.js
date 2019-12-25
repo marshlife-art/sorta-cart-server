@@ -37,15 +37,15 @@ describe('services', function() {
       assert.equal(admins.rows.length, 1)
     })
 
-    it('should filter users by name', async function() {
+    it('should filter users by email', async function() {
       const some_member = await getUsers({
         filters: [
           {
             column: {
-              field: 'name'
+              field: 'email'
             },
             // note: NOT an array
-            value: 'some member'
+            value: 'a@mem.ber'
           }
         ]
       })
@@ -58,10 +58,10 @@ describe('services', function() {
         filters: [
           {
             column: {
-              field: 'name'
+              field: 'email'
             },
             // note: NOT an array
-            value: 'some member'
+            value: 'a@mem.ber'
           },
           {
             column: {

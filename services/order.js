@@ -4,6 +4,7 @@ const models = require('../models')
 const Order = models.Order
 const OrderLineItem = models.OrderLineItem
 const User = models.User
+const Member = models.Member
 const Op = models.Sequelize.Op
 // using sqlite in test env so no iLike :/
 const iLike = process.env.NODE_ENV === 'test' ? Op.like : Op.iLike
@@ -22,14 +23,7 @@ const getOrders = async query => {
     ]
   }
 
-  findParams.include = [
-    {
-      model: OrderLineItem
-    },
-    {
-      model: User
-    }
-  ]
+  findParams.include = [OrderLineItem, User, Member]
 
   findParams.distinct = true
 
@@ -39,14 +33,7 @@ const getOrders = async query => {
 const getOrder = async id => {
   return await Order.findOne({
     where: { id },
-    include: [
-      {
-        model: OrderLineItem
-      },
-      {
-        model: User
-      }
-    ]
+    include: [OrderLineItem, User, Member]
   })
 }
 

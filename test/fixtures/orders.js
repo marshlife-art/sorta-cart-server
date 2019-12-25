@@ -36,6 +36,11 @@ function fakeOrder(i) {
 
 async function syncOrders() {
   await models.Order.sync({ force: true, match: /_test$/, logging: false })
+  await models.Member.sync({
+    force: true,
+    match: /_test$/,
+    logging: false
+  })
   await models.User.sync({
     force: true,
     match: /_test$/,

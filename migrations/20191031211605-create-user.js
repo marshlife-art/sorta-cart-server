@@ -16,9 +16,6 @@ module.exports = {
         role: {
           type: Sequelize.STRING
         },
-        name: {
-          type: Sequelize.STRING
-        },
         email_confirmed: {
           type: Sequelize.BOOLEAN
         },
@@ -30,12 +27,6 @@ module.exports = {
         },
         active: {
           type: Sequelize.BOOLEAN
-        },
-        phone: {
-          type: Sequelize.STRING
-        },
-        address: {
-          type: Sequelize.STRING
         },
         data: {
           type: Sequelize.JSONB,
@@ -55,7 +46,7 @@ module.exports = {
       })
       .then(() =>
         queryInterface.addIndex('Users', ['email'], {
-          indicesType: 'UNIQUE'
+          unique: true
         })
       )
       .then(() => queryInterface.addIndex('Users', ['role']))

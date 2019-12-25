@@ -24,6 +24,9 @@ module.exports = {
             key: 'id'
           }
         },
+        price: {
+          type: Sequelize.DECIMAL(10, 2)
+        },
         quantity: {
           type: Sequelize.INTEGER
         },
@@ -31,6 +34,9 @@ module.exports = {
           type: Sequelize.DECIMAL(10, 2)
         },
         kind: {
+          type: Sequelize.STRING
+        },
+        description: {
           type: Sequelize.STRING
         },
         vendor: {

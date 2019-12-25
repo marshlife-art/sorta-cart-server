@@ -43,7 +43,7 @@ undo all seeds:
 undo specific seed:
 `npx sequelize-cli db:seed:undo --seed name-of-seed-as-in-data`
 
-##### all-in-one
+##### all-in-one reset
 
 `npm run db:migrate:undo:all && npm run db:migrate && npm run db:seed:all`
 
@@ -51,7 +51,7 @@ undo specific seed:
 
 getting started:
 
-`npm i -S body-parser express jsonwebtoken passport passport-jwt sequelize pg pg-hstore dotenv -D sequelize-cli`
+`npm i -S body-parser express jsonwebtoken passport passport-jwt sequelize pg pg-hstore dotenv multer -D sequelize-cli`
 
 #### sequelize setup
 
@@ -67,3 +67,5 @@ generate some models:
 `npx sequelize-cli model:generate --name WholesaleOrder --attributes data:jsonb`
 
 `npx sequelize-cli model:generate --name Page --attributes href:string,content:text`
+
+`npx sequelize-cli model:generate --name Member --attributes name:string,phone:string,address:string,discount:number,fees_paid:number,store_credit:number,shares:number,member_type:string`

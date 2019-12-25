@@ -20,7 +20,6 @@ describe('models', function() {
     it('should create GUEST users', async function() {
       const user = await createUser(GUEST)
 
-      assert.equal(user.name, GUEST.name)
       assert.equal(user.email, GUEST.email)
       assert.equal(user.role, GUEST.role)
     })

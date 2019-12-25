@@ -75,11 +75,7 @@ module.exports = {
       .then(() => queryInterface.addIndex('Products', ['ws_price']))
       .then(() => queryInterface.addIndex('Products', ['u_price']))
       .then(() => queryInterface.addIndex('Products', ['import_tag']))
-      .then(() =>
-        queryInterface.addIndex('Products', ['unf'], {
-          indicesType: 'UNIQUE'
-        })
-      )
+      .then(() => queryInterface.addIndex('Products', ['unf']))
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable('Products')

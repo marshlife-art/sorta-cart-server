@@ -1,19 +1,16 @@
 const models = require('../../models')
 
 const GUEST = {
-  name: 'guest',
   email: 'guest@marshcoop.org',
   password: 'zomgzomg',
   role: 'guest'
 }
 const MEMBER = {
-  name: 'some member',
   email: 'a@mem.ber',
   password: 'immamember',
   role: 'member'
 }
 const ADMIN = {
-  name: 'admin',
   email: 'admin@marshcoop.org',
   password: 'zomgzomg',
   role: 'admin'

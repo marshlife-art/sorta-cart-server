@@ -22,7 +22,7 @@ const getUsers = async query => {
   const q = query.search || ''
   if (q) {
     findParams.where[Op.or] = [
-      { name: { [iLike]: `%${q}%` } },
+      // { name: { [iLike]: `%${q}%` } },
       { email: { [iLike]: `%${q}%` } }
     ]
   }

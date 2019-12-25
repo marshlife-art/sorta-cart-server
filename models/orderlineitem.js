@@ -3,9 +3,11 @@ module.exports = (sequelize, DataTypes) => {
   const OrderLineItem = sequelize.define(
     'OrderLineItem',
     {
+      price: DataTypes.DECIMAL(10, 2),
       quantity: DataTypes.INTEGER,
       total: DataTypes.DECIMAL(10, 2),
       kind: DataTypes.STRING,
+      description: DataTypes.STRING,
       vendor: DataTypes.STRING,
       selected_unit: DataTypes.STRING,
       data: DataTypes.JSONB

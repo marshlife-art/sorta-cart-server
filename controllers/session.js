@@ -33,7 +33,6 @@ module.exports = function(passport) {
         res.json({
           msg: 'ok',
           user: {
-            name: user.name,
             email: user.email,
             role: user.role,
             token: token
@@ -53,7 +52,7 @@ module.exports = function(passport) {
       const user = reqUser.dataValues
       res.json({
         msg: 'ok',
-        user: { name: user.name, email: user.email, role: user.role }
+        user: { email: user.email, role: user.role }
       })
     }
   )

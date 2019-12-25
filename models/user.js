@@ -7,10 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       email: DataTypes.STRING,
       role: DataTypes.STRING,
-      name: DataTypes.STRING,
       password: DataTypes.STRING,
-      phone: DataTypes.STRING,
-      address: DataTypes.STRING,
       email_confirmed: DataTypes.BOOLEAN,
       auth_key: DataTypes.STRING,
       active: DataTypes.BOOLEAN,
@@ -38,6 +35,7 @@ module.exports = (sequelize, DataTypes) => {
 
   User.associate = function(models) {
     User.hasMany(models.Order)
+    User.hasOne(models.Member)
   }
   return User
 }
