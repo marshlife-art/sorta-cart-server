@@ -5,7 +5,9 @@ const {
   getWholesaleOrder,
   createWholesaleOrder,
   upsertWholesaleOrder,
-  getLineItems
+  getLineItems,
+  addLineItems,
+  destroyWholesaleOrder
 } = require('../services/wholesaleorder')
 
 module.exports = function(passport) {
@@ -27,7 +29,6 @@ module.exports = function(passport) {
     '/wholesaleorders/lineitems',
     passport.authenticate('jwt', { session: false }),
     function(req, res) {
-      console.log('ZOMG getWholesaleOrders status:', req.body.status)
       getLineItems(req.body).then(result =>
         res.json({
           data: result.rows,
@@ -88,6 +89,42 @@ module.exports = function(passport) {
           res.status(500).json({
             error: true,
             msg: `unable to update wholesale order err: ${err}`
+          })
+        )
+    }
+  )
+
+  router.post(
+    '/wholesaleorder/addlineitems',
+    passport.authenticate('jwt', { session: false }),
+    function(req, res) {
+      addLineItems(req.body)
+        .then(order =>
+          res.json({
+            success: true,
+            msg: 'line items added!',
+            order: order
+          })
+        )
+        .catch(err =>
+          res.status(500).json({
+            error: true,
+            msg: `unable to update line items err: ${err}`
+          })
+        )
+    }
+  )
+
+  router.delete(
+    '/wholesaleorder',
+    passport.authenticate('jwt', { session: false }),
+    function(req, res) {
+      destroyWholesaleOrder(req.body)
+        .then(() => res.json({ msg: 'wholesale order destroyed!' }))
+        .catch(err =>
+          res.status(500).json({
+            error: true,
+            msg: `o noz! unable to destroy wholesale order ${err}`
           })
         )
     }

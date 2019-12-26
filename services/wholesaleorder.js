@@ -61,10 +61,35 @@ const upsertWholesaleOrder = async wholesaleorder => {
   })
 }
 
+const addLineItems = async ({ id, selectedLineItems }) => {
+  let WholesaleOrderId = id
+  if (id === 'new') {
+    WholesaleOrderId = await WholesaleOrder.create({
+      vendor: 'New WholesaleOrder',
+      status: 'new'
+    }).then(order => order.id)
+  }
+
+  return await OrderLineItem.update(
+    { WholesaleOrderId },
+    { where: { id: { [Op.in]: selectedLineItems } } }
+  )
+}
+
+const destroyWholesaleOrder = async ({ id }) => {
+  await OrderLineItem.update(
+    { WholesaleOrderId: null },
+    { where: { WholesaleOrderId: id } }
+  )
+  return await WholesaleOrder.destroy({ where: { id } })
+}
+
 module.exports = {
   getWholesaleOrders,
   getLineItems,
   getWholesaleOrder,
   createWholesaleOrder,
-  upsertWholesaleOrder
+  upsertWholesaleOrder,
+  addLineItems,
+  destroyWholesaleOrder
 }

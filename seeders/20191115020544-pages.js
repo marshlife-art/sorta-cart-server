@@ -17,7 +17,7 @@ module.exports = {
       'Pages',
       [
         {
-          slug: '/',
+          slug: 'default',
           content: '<b>hello world!</b>'
         },
         {
