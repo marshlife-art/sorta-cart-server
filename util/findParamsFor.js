@@ -6,8 +6,8 @@ const findParamsFor = query => {
   // console.log('findParamsFor query:', query)
   const limit = query.pageSize || 50
   const page = query.page || 0
-  const orderBy = query.orderBy && query.orderBy.field
-  const orderDirection = query.orderDirection || 'ASC'
+  const orderBy = (query.orderBy && query.orderBy.field) || 'id'
+  const orderDirection = query.orderDirection || 'DESC'
 
   let findParams = {
     offset: page * limit,
