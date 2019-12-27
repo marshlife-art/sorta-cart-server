@@ -84,6 +84,13 @@ const destroyWholesaleOrder = async ({ id }) => {
   return await WholesaleOrder.destroy({ where: { id } })
 }
 
+const removeLineItems = async ({ ids }) => {
+  return await OrderLineItem.update(
+    { WholesaleOrderId: null },
+    { where: { id: { [Op.in]: ids } } }
+  )
+}
+
 module.exports = {
   getWholesaleOrders,
   getLineItems,
@@ -91,5 +98,6 @@ module.exports = {
   createWholesaleOrder,
   upsertWholesaleOrder,
   addLineItems,
-  destroyWholesaleOrder
+  destroyWholesaleOrder,
+  removeLineItems
 }

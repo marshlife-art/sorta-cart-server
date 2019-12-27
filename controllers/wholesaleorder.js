@@ -7,7 +7,8 @@ const {
   upsertWholesaleOrder,
   getLineItems,
   addLineItems,
-  destroyWholesaleOrder
+  destroyWholesaleOrder,
+  removeLineItems
 } = require('../services/wholesaleorder')
 
 module.exports = function(passport) {
@@ -125,6 +126,21 @@ module.exports = function(passport) {
           res.status(500).json({
             error: true,
             msg: `o noz! unable to destroy wholesale order ${err}`
+          })
+        )
+    }
+  )
+
+  router.delete(
+    '/wholesaleorder/removelineitem',
+    passport.authenticate('jwt', { session: false }),
+    function(req, res) {
+      removeLineItems(req.body)
+        .then(() => res.json({ msg: 'line item removed!' }))
+        .catch(err =>
+          res.status(500).json({
+            error: true,
+            msg: `o noz! unable to remove line items ${err}`
           })
         )
     }
