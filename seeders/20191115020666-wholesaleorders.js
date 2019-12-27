@@ -5,7 +5,7 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return models.WholesaleOrder.create(
       {
-        vendor: 'test',
+        vendor: 'unfi',
         notes: 'just a test wholesale order, here!',
         status: 'new'
       },

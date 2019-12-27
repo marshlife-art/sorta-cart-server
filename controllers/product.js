@@ -123,14 +123,20 @@ module.exports = function(passport) {
       if (req.fileValidationError) {
         res.send(req.fileValidationError)
       } else {
-        const { vendor, import_tag, prev_import_tag } = req.body
+        const { vendor, import_tag, prev_import_tag, markup } = req.body
         if (!vendor || !import_tag) {
           res.status(500).json({
             error: true,
             msg: `You must include a vendor and import tag string!`
           })
         } else {
-          addProducts(vendor, import_tag, req.file.path, prev_import_tag)
+          addProducts(
+            vendor,
+            import_tag,
+            req.file.path,
+            prev_import_tag,
+            markup
+          )
             .then(response => res.json({ msg: response }))
             .catch(err =>
               res.status(500).json({

@@ -53,29 +53,26 @@ module.exports = {
         address: member.address,
         notes: 'is test',
         total:
-          2 * products[0].ws_price_markup +
-          6 * products[1].u_price_markup +
-          -66.66 +
-          6.66,
+          2 * products[0].ws_price + 6 * products[1].u_price + -66.66 + 6.66,
         OrderLineItems: [
           {
-            price: products[0].ws_price_markup,
+            price: products[0].ws_price,
             quantity: 2,
             description: `${products[0].name} ${products[0].description}`,
             selected_unit: 'CS',
-            total: 2 * products[0].ws_price_markup,
+            total: 2 * products[0].ws_price,
             kind: 'product',
-            vendor: 'test',
+            vendor: 'unfi',
             data: { product: products[0] }
           },
           {
-            price: products[1].u_price_markup,
+            price: products[1].u_price,
             quantity: 6,
             description: `${products[1].name} ${products[1].description}`,
             selected_unit: 'EA',
-            total: 6 * products[1].u_price_markup,
+            total: 6 * products[1].u_price,
             kind: 'product',
-            vendor: 'test',
+            vendor: 'unfi',
             data: { product: products[1] }
           },
           {

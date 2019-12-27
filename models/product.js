@@ -14,8 +14,8 @@ module.exports = (sequelize, DataTypes) => {
       unit_type: DataTypes.STRING,
       ws_price: DataTypes.DECIMAL(10, 2),
       u_price: DataTypes.DECIMAL(10, 2),
-      ws_price_markup: DataTypes.DECIMAL(10, 2),
-      u_price_markup: DataTypes.DECIMAL(10, 2),
+      ws_price_cost: DataTypes.DECIMAL(10, 2),
+      u_price_cost: DataTypes.DECIMAL(10, 2),
       codes: DataTypes.STRING,
       import_tag: DataTypes.STRING,
       vendor: DataTypes.STRING

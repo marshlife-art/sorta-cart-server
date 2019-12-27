@@ -47,8 +47,14 @@ const getProductVendors = async () =>
 const getProductImportTags = async () =>
   Product.aggregate('import_tag', 'DISTINCT', { plain: false })
 
-const addProducts = async (vendor, import_tag, csvFile, prev_import_tag) => {
-  return loadProductsCSV(csvFile, import_tag, vendor).then(products => {
+const addProducts = async (
+  vendor,
+  import_tag,
+  csvFile,
+  prev_import_tag,
+  markup
+) => {
+  return loadProductsCSV(csvFile, import_tag, vendor, markup).then(products => {
     return models.sequelize.transaction(t => {
       // chain all your queries here. make sure you return them.
       if (prev_import_tag !== undefined && prev_import_tag !== '') {
