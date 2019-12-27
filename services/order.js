@@ -41,7 +41,34 @@ const createOrder = async order => {
   delete order.id
   delete order.createdAt
   delete order.updatedAt
-  return await Order.create(order, { include: [models.OrderLineItem] })
+  return await Order.create(order, { include: [OrderLineItem] })
 }
 
-module.exports = { getOrders, getOrder, createOrder }
+const updateOrder = async order => {
+  delete order.createdAt
+  delete order.updatedAt
+
+  if (!order || !order.id || order.id === 'new') {
+    throw new Error('no such order id exist to update!')
+  }
+
+  return await Order.findOne(
+    { where: { id: order.id } },
+    { include: [OrderLineItem] }
+  ).then(async o => {
+    await o.update(order)
+    order.OrderLineItems.forEach(async li => {
+      if (li.id) {
+        await OrderLineItem.findOne({ where: { id: li.id } }).then(oli =>
+          oli.update(li)
+        )
+      } else {
+        const newoli = await OrderLineItem.create(li)
+        await o.addOrderLineItem(newoli)
+      }
+    })
+    return o
+  })
+}
+
+module.exports = { getOrders, getOrder, createOrder, updateOrder }

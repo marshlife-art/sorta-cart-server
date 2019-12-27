@@ -1,6 +1,11 @@
 const router = require('express').Router()
 
-const { getOrders, getOrder, createOrder } = require('../services/order')
+const {
+  getOrders,
+  getOrder,
+  createOrder,
+  updateOrder
+} = require('../services/order')
 
 module.exports = function(passport) {
   router.post(
@@ -34,9 +39,21 @@ module.exports = function(passport) {
     '/order/create',
     passport.authenticate('jwt', { session: false }),
     function(req, res) {
-      console.log('/order/create req.body:', JSON.stringify(req.body))
-
       createOrder(req.body)
+        .then(order => res.json({ success: true, msg: 'ok', order: order }))
+        .catch(err =>
+          res
+            .status(500)
+            .json({ error: true, msg: `unable to create order err: ${err}` })
+        )
+    }
+  )
+
+  router.post(
+    '/order/update',
+    passport.authenticate('jwt', { session: false }),
+    function(req, res) {
+      updateOrder(req.body)
         .then(order => res.json({ success: true, msg: 'ok', order: order }))
         .catch(err =>
           res

@@ -21,7 +21,6 @@ const getProducts = async query => {
     ]
   }
 
-  // console.log('products findParams:', JSON.stringify(findParams))
   return await Product.findAndCountAll(findParams)
 }
 

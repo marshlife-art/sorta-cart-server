@@ -8,7 +8,6 @@ const Op = models.Sequelize.Op
 const iLike = process.env.NODE_ENV === 'test' ? Op.like : Op.iLike
 
 const createMember = async member => {
-  console.log('zomfg createMember service member:', member)
   if (!member) {
     return
   }
@@ -48,7 +47,6 @@ const getMembers = async query => {
 }
 
 const destroyMember = async id => {
-  console.log('ffffffff destroyMember id:', id)
   return await Member.destroy({ where: { id } })
 }
 
