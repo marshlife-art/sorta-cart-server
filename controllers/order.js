@@ -4,7 +4,8 @@ const {
   getOrders,
   getOrder,
   createOrder,
-  updateOrder
+  updateOrder,
+  getOrdersByIds
 } = require('../services/order')
 
 module.exports = function(passport) {
@@ -59,6 +60,27 @@ module.exports = function(passport) {
           res
             .status(500)
             .json({ error: true, msg: `unable to create order err: ${err}` })
+        )
+    }
+  )
+
+  // getOrdersByIds
+  router.post(
+    '/orders/print',
+    passport.authenticate('jwt', { session: false }),
+    function(req, res) {
+      const { orderIds } = req.body
+      console.log('zomg print orderIds:', orderIds)
+      getOrdersByIds(orderIds)
+        .then(orders => {
+          // #TODO: render a html template...
+          // res.json({ success: true, msg: 'ok', order: orders })
+          console.log('zomg orders:', JSON.stringify(orders))
+          res.render('orders', { orders })
+        })
+        .catch(
+          err => res.status(500).send(`unable to print orders err: ${err}`)
+          // .json({ error: true, msg: `unable to print orders err: ${err}` })
         )
     }
   )

@@ -4,6 +4,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const passport = require('passport')
 const passportJWT = require('passport-jwt')
+const exphbs = require('express-handlebars')
 
 const { getUser } = require('./services/user')
 
@@ -36,8 +37,12 @@ app.use(passport.initialize())
 
 // parse application/json
 app.use(bodyParser.json())
-//parse application/x-www-form-urlencoded
+// parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }))
+
+// handlebarz
+app.engine('handlebars', exphbs())
+app.set('view engine', 'handlebars')
 
 // init all the controllerz/routez:
 app.use('/', require('./controllers')(passport))

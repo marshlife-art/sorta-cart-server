@@ -75,4 +75,21 @@ const updateOrder = async order => {
   })
 }
 
-module.exports = { getOrders, getOrder, createOrder, updateOrder }
+const getOrdersByIds = async orderIds => {
+  return await Order.findAll({
+    where: {
+      id: {
+        [Op.or]: orderIds
+      }
+    },
+    include: [OrderLineItem, User, Member]
+  })
+}
+
+module.exports = {
+  getOrders,
+  getOrder,
+  createOrder,
+  updateOrder,
+  getOrdersByIds
+}
