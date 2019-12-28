@@ -7,13 +7,11 @@
         <th>status</th>
         <th>payment_status</th>
         <th>shipment_status</th>
-        <th>total</th>
         <th>name</th>
         <th>email</th>
         <th>phone</th>
         <th>address</th>
         <th>notes</th>
-        <th>history</th>
         <th>createdAt</th>
         <th>updatedAt</th>
       </tr>
@@ -24,13 +22,11 @@
         <td>{{this.status}}</td>
         <td>{{this.payment_status}}</td>
         <td>{{this.shipment_status}}</td>
-        <td>{{this.total}}</td>
         <td>{{this.name}}</td>
         <td>{{this.email}}</td>
         <td>{{this.phone}}</td>
         <td>{{this.address}}</td>
         <td>{{this.notes}}</td>
-        <td>{{this.history}}</td>
         <td>{{this.createdAt}}</td>
         <td>{{this.updatedAt}}</td>
 
@@ -42,10 +38,10 @@
       <tr>
         <th>vendor</th>
         <th>description</th>
-        <th>quantity</th>
-        <th>selected_unit</th>
-        <th>price</th>
-        <th>total</th>
+        <th>qty</th>
+        <th>unit</th>
+        <th align="right">price</th align="right">
+        <th align="right">total</th>
       </tr>
     </thead>
     <tbody>
@@ -55,10 +51,18 @@
         <td>{{this.description}}</td>
         <td>{{this.quantity}}</td>
         <td>{{this.selected_unit}}</td>
-        <td>{{this.price}}</td>
-        <td>{{this.total}}</td>
+        <td align="right">{{this.price}}</td>
+        <td align="right">{{this.total}}</td>
       </tr>
       {{/each}}
+      <tr>
+        <td colspan="4"></td>
+        <td colspan="2" align="right">TOTAL</td>
+      </tr>
+      <tr>
+        <td colspan="5"></td>
+        <td align="right">{{this.total}}</td>
+      </tr>
     </tbody>
   </table>
 </div>
