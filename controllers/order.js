@@ -69,7 +69,6 @@ module.exports = function(passport) {
     passport.authenticate('jwt', { session: false }),
     function(req, res) {
       const { orderIds } = req.body
-      console.log('zomg print orderIds:', orderIds)
       getOrdersByIds(orderIds)
         .then(orders => {
           res.render('orders', { orders })

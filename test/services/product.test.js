@@ -55,10 +55,10 @@ describe('services', function() {
           }
         ]
       })
-      console.log(
-        'zomg got proddz with codez:',
-        c_product.rows.map(p => `${p.name} ${p.codes}`)
-      )
+      // console.log(
+      //   'zomg got proddz with codez:',
+      //   c_product.rows.map(p => `${p.name} ${p.codes}`)
+      // )
       assert.equal(c_product.count, 1)
       assert.equal(c_product.rows.length, 1)
     })
