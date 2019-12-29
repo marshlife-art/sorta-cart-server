@@ -165,7 +165,7 @@
       </tr>
 
       <tr>
-        <th colspan="6" align="left" class="divider">LINE ITEMS</th>
+        <th colspan="6" align="left" class="divider">LINE ITEMS ({{this.item_count}})</th>
       </tr>
 
       <tr>
@@ -177,7 +177,7 @@
         <th align="right">total</th>
       </tr>
 
-      {{#each this.OrderLineItems}}
+      {{#each_when this.OrderLineItems "kind" "product"}}
       <tr class="li">
         <td align="center">{{this.vendor}}</td>
         <td>{{this.description}}</td>
@@ -186,7 +186,50 @@
         <td align="right">{{this.price}}</td>
         <td align="right">{{this.total}}</td>
       </tr>
-      {{/each}}
+      {{/each_when}}
+
+      <tr>
+        <td colspan="5"></td>
+        <td align="center" class="total left-border"><b>SUBTOTAL</b></td>
+      </tr>
+      <tr>
+        <td colspan="5" class="bottom-border"></td>
+        <td align="right" class="left-border bottom-border"><b>{{this.subtotal}}</b></td>
+      </tr>
+
+      {{#each_when this.OrderLineItems "kind" "tax"}}
+      <tr class="li">
+        <td align="center">{{this.vendor}}</td>
+        <td>{{this.description}}</td>
+        <td align="left">{{this.quantity}}</td>
+        <td align="center">{{this.selected_unit}}</td>
+        <td align="right">{{this.price}}</td>
+        <td align="right">{{this.total}}</td>
+      </tr>
+      {{/each_when}}
+
+      {{#each_when this.OrderLineItems "kind" "adjustment"}}
+      <tr class="li">
+        <td align="center">{{this.vendor}}</td>
+        <td>{{this.description}}</td>
+        <td align="left">{{this.quantity}}</td>
+        <td align="center">{{this.selected_unit}}</td>
+        <td align="right">{{this.price}}</td>
+        <td align="right">{{this.total}}</td>
+      </tr>
+      {{/each_when}}
+
+      {{#each_when this.OrderLineItems "kind" "payment"}}
+      <tr class="li">
+        <td align="center">{{this.vendor}}</td>
+        <td>{{this.description}}</td>
+        <td align="left">{{this.quantity}}</td>
+        <td align="center">{{this.selected_unit}}</td>
+        <td align="right">{{this.price}}</td>
+        <td align="right">{{this.total}}</td>
+      </tr>
+      {{/each_when}}
+
       <tr>
         <td colspan="5"></td>
         <td align="center" class="total left-border"><b>TOTAL</b></td>

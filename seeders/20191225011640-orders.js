@@ -45,7 +45,7 @@ module.exports = {
         UserId: admin.id,
         MemberId: member.id,
         status: 'new',
-        payment_status: 'balance_due',
+        payment_status: 'paid',
         shipment_status: 'backorder',
         name: member.name,
         email: member.User.email,
@@ -56,6 +56,7 @@ module.exports = {
         subtotal: 2 * products[0].ws_price + 6 * products[1].u_price,
         total:
           2 * products[0].ws_price + 6 * products[1].u_price + -66.66 + 6.66,
+        item_count: 2,
         OrderLineItems: [
           {
             price: products[0].ws_price,
@@ -86,7 +87,14 @@ module.exports = {
           {
             quantity: 1,
             total: 6.66,
+            description: 'tax',
             kind: 'tax'
+          },
+          {
+            quantity: 1,
+            total: -65.46,
+            description: 'payment',
+            kind: 'payment'
           }
         ]
       },

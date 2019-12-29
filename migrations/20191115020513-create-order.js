@@ -26,10 +26,12 @@ module.exports = {
           type: Sequelize.STRING
         },
         total: {
-          type: Sequelize.DECIMAL(10, 2)
+          type: Sequelize.DECIMAL(10, 2),
+          defaultValue: 0
         },
         subtotal: {
-          type: Sequelize.DECIMAL(10, 2)
+          type: Sequelize.DECIMAL(10, 2),
+          defaultValue: 0
         },
         name: {
           type: Sequelize.STRING,
@@ -50,6 +52,10 @@ module.exports = {
         },
         email_sent: {
           type: Sequelize.BOOLEAN
+        },
+        item_count: {
+          type: Sequelize.INTEGER,
+          defaultValue: 0
         },
         history: {
           type: Sequelize.JSONB

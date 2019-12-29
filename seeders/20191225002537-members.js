@@ -8,12 +8,12 @@ module.exports = {
       [
         {
           email: 'member@marshcoop.org',
-          password: 'zomgzomg',
+          password: bcrypt.hashSync('zomgzomg', 10),
           role: 'member'
         },
         {
           email: 'another@marshcoop.org',
-          password: 'zomgzomg',
+          password: bcrypt.hashSync('zomgzomg', 10),
           role: 'member'
         }
       ],

@@ -41,7 +41,19 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 // handlebarz
-app.engine('handlebars', exphbs())
+var hbs = exphbs.create({
+  helpers: {
+    each_when: function(list, k, v, opts) {
+      console.log(arguments)
+      var i,
+        result = ''
+      for (i = 0; i < list.length; ++i)
+        if (list[i][k] == v) result = result + opts.fn(list[i])
+      return result
+    }
+  }
+})
+app.engine('handlebars', hbs.engine)
 app.set('view engine', 'handlebars')
 
 // init all the controllerz/routez:
