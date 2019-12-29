@@ -197,7 +197,7 @@
         <td align="right" class="left-border bottom-border"><b>{{this.subtotal}}</b></td>
       </tr>
 
-      {{#each_when this.OrderLineItems "kind" "tax"}}
+      {{#each_when this.OrderLineItems "kind" "adjustment"}}
       <tr class="li">
         <td align="center">{{this.vendor}}</td>
         <td>{{this.description}}</td>
@@ -208,13 +208,11 @@
       </tr>
       {{/each_when}}
 
-      {{#each_when this.OrderLineItems "kind" "adjustment"}}
+      {{#each_when this.OrderLineItems "kind" "tax"}}
       <tr class="li">
         <td align="center">{{this.vendor}}</td>
         <td>{{this.description}}</td>
-        <td align="left">{{this.quantity}}</td>
-        <td align="center">{{this.selected_unit}}</td>
-        <td align="right">{{this.price}}</td>
+        <td colspan="3"></td>
         <td align="right">{{this.total}}</td>
       </tr>
       {{/each_when}}
