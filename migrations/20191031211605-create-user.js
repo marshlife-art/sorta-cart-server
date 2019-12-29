@@ -22,6 +22,9 @@ module.exports = {
         auth_key: {
           type: Sequelize.STRING
         },
+        reg_key: {
+          type: Sequelize.STRING
+        },
         password: {
           type: Sequelize.STRING
         },
@@ -50,6 +53,7 @@ module.exports = {
         })
       )
       .then(() => queryInterface.addIndex('Users', ['role']))
+      .then(() => queryInterface.addIndex('Users', ['auth_key']))
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable('Users')

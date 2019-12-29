@@ -1,13 +1,16 @@
 const findParamsFor = require('../util/findParamsFor')
 const models = require('../models')
+const { sendRegistrationEmail } = require('../mailers/user_mailer')
 
 const User = models.User
 const Op = models.Sequelize.Op
 // using sqlite in test env so no iLike :/
 const iLike = process.env.NODE_ENV === 'test' ? Op.like : Op.iLike
 
-const createUser = async ({ email }) => {
-  return await User.create({ email })
+const createUser = async ({ email, role }) => {
+  const user = await User.create({ email, role })
+  await sendRegistrationEmail(user.email, user.reg_key)
+  return user
 }
 
 const getUser = async obj => {
@@ -34,4 +37,14 @@ const destroyUser = async ({ id }) => {
   return await User.destroy({ where: { id: id } })
 }
 
-module.exports = { createUser, getUser, getUsers, destroyUser }
+const registerUser = async (reg_key, password) => {
+  return await User.findOne({ where: { reg_key } }).then(user => {
+    user.password = password
+    user.reg_key = null
+    user.email_confirmed = true
+    user.active = true
+    return user.save()
+  })
+}
+
+module.exports = { createUser, getUser, getUsers, destroyUser, registerUser }

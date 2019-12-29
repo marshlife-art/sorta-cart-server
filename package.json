@@ -9,7 +9,11 @@
     "test:coverage": "NODE_ENV=test nyc --reporter=text --reporter=html mocha --recursive && nyc report --reporter=text > coverage.txt",
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all",
-    "db:seed:all": "sequelize-cli db:seed:all"
+    "db:seed:all": "sequelize-cli db:seed:all",
+    "create:admin": "node util/cliCreateAdmin.js",
+    "build": "react-scripts build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "author": "edwardsharp",
   "license": "ISC",
@@ -23,6 +27,7 @@
     "express-handlebars": "^3.1.0",
     "json2csv": "^4.5.4",
     "jsonwebtoken": "^8.5.1",
+    "mailgun-js": "^0.22.0",
     "multer": "^1.4.2",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",

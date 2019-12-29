@@ -1,4 +1,6 @@
 const router = require('express').Router()
+const APP_VERSION = `v${process.env.npm_package_version ||
+  require('../package.json').version}`
 
 module.exports = function(passport) {
   router.use('/', require('./session')(passport))
@@ -10,7 +12,7 @@ module.exports = function(passport) {
   router.use('/', require('./wholesaleorder')(passport))
 
   router.get('/', function(req, res) {
-    res.json({ MARSH: 'COOP' })
+    res.json({ MARSH: 'COOP', APP_VERSION, 'MADE WITH': '♥ in NYC' })
   })
 
   return router

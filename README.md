@@ -23,6 +23,24 @@ MAILGUN_API_KEY=
 
 ## devel setup
 
+### scripts
+
+build and run the app:
+
+`npm start`
+
+run tests:
+
+`npm test`
+
+run test and write coverage.txt
+
+`npm run test:coverage`
+
+create an admin user from the command line:
+
+`npm run create:admin -- hello@marshcoop.org zomgzomg`
+
 ### DATABASE (PostgreSQL)
 
 #### run migrations

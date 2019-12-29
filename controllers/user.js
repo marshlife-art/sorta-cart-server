@@ -1,6 +1,11 @@
 const router = require('express').Router()
 
-const { getUser, getUsers, destroyUser } = require('../services/user')
+const {
+  getUser,
+  getUsers,
+  destroyUser,
+  createUser
+} = require('../services/user')
 
 module.exports = function(passport) {
   router.post(
@@ -47,6 +52,21 @@ module.exports = function(passport) {
             .status(500)
             .json({ error: true, msg: `o noz! unable to destroy user ${err}` })
         )
+    }
+  )
+
+  router.post(
+    '/user/create',
+    passport.authenticate('jwt', { session: false }),
+    function(req, res) {
+      const { email, role } = req.body
+      if (!email) {
+        res.json({ error: true, msg: 'no email!' })
+      } else {
+        createUser({ email, role })
+          .then(user => res.json({ user, msg: 'account created successfully' }))
+          .catch(err => res.json({ error: true, msg: err }))
+      }
     }
   )
 

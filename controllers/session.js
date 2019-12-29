@@ -1,19 +1,29 @@
 const router = require('express').Router()
 const jwt = require('jsonwebtoken')
 
-const { getUser, createUser } = require('../services/user')
+const { getUser, registerUser } = require('../services/user')
 
 module.exports = function(passport) {
   router.post('/register', function(req, res, next) {
-    const { email } = req.body
-    if (!email) {
-      res.json({ error: true, msg: 'no email!' })
+    const { regKey, password } = req.body
+    if (!regKey) {
+      res.json({ error: true, msg: 'no registration key' })
     } else {
-      createUser({ email })
-        .then(user =>
-          // #TODO: email user a registration link...
-          res.json({ user, msg: 'account created successfully' })
-        )
+      registerUser(regKey, password)
+        .then(user => {
+          // from now on we'll identify the user by the id and the id is the
+          // only personalized value that goes the jwt token
+          let payload = { id: user.id }
+          let token = jwt.sign(payload, process.env.JWT_SECRET)
+          res.json({
+            msg: 'ok',
+            user: {
+              email: user.email,
+              role: user.role,
+              token: token
+            }
+          })
+        })
         .catch(err => res.json({ error: true, msg: err }))
     }
   })
@@ -49,11 +59,15 @@ module.exports = function(passport) {
     passport.authenticate('jwt', { session: false }),
     async function(req, res) {
       const reqUser = await req.user
-      const user = reqUser.dataValues
-      res.json({
-        msg: 'ok',
-        user: { id: user.id, email: user.email, role: user.role }
-      })
+      if (reqUser && reqUser.dataValues && reqUser.dataValues.id) {
+        const user = reqUser.dataValues
+        res.json({
+          msg: 'ok',
+          user: { id: user.id, email: user.email, role: user.role }
+        })
+      } else {
+        res.status(401).json({ msg: 'unknown user' })
+      }
     }
   )
 
