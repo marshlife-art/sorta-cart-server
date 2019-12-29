@@ -51,7 +51,9 @@ module.exports = {
         email: member.User.email,
         phone: member.phone,
         address: member.address,
-        notes: 'is test',
+        notes:
+          'is test. with some really really long notes here. just so many notes. just goes on and on and on and on. there is a lot to take note about in this order, so let me tell you all about all the thingz that are nothing at all and really not important this is just filler text blah blah blah yadda yadda yadda. what is the character count anyway, hopefully this does not make the order recepit format all wonky. well okay, that is all for now...',
+        subtotal: 2 * products[0].ws_price + 6 * products[1].u_price,
         total:
           2 * products[0].ws_price + 6 * products[1].u_price + -66.66 + 6.66,
         OrderLineItems: [

@@ -7,11 +7,13 @@ module.exports = (sequelize, DataTypes) => {
       payment_status: DataTypes.STRING,
       shipment_status: DataTypes.STRING,
       total: DataTypes.DECIMAL(10, 2),
+      subtotal: DataTypes.DECIMAL(10, 2),
       name: DataTypes.STRING,
       email: DataTypes.STRING,
       phone: DataTypes.STRING,
       address: DataTypes.STRING,
-      notes: DataTypes.STRING,
+      notes: DataTypes.TEXT,
+      email_sent: DataTypes.BOOLEAN,
       history: DataTypes.JSONB
     },
     {}

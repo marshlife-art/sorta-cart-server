@@ -64,7 +64,6 @@ module.exports = function(passport) {
     }
   )
 
-  // getOrdersByIds
   router.post(
     '/orders/print',
     passport.authenticate('jwt', { session: false }),
@@ -73,14 +72,10 @@ module.exports = function(passport) {
       console.log('zomg print orderIds:', orderIds)
       getOrdersByIds(orderIds)
         .then(orders => {
-          // #TODO: render a html template...
-          // res.json({ success: true, msg: 'ok', order: orders })
-          console.log('zomg orders:', JSON.stringify(orders))
           res.render('orders', { orders })
         })
-        .catch(
-          err => res.status(500).send(`unable to print orders err: ${err}`)
-          // .json({ error: true, msg: `unable to print orders err: ${err}` })
+        .catch(err =>
+          res.status(500).send(`unable to print orders err: ${err}`)
         )
     }
   )

@@ -1,67 +1,199 @@
+<style>
+  .order {
+    margin-bottom: 50px;
+    padding: 1em;
+    page-break-after: always;
+    font-family: sans-serif;
+  }
+
+  th,
+  b {
+    font-variant: small-caps;
+  }
+
+  table {
+    border: thin solid black;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  table tbody tr.li td,
+  td.total {
+    border-bottom: thin solid black;
+  }
+
+  tr td:first-child,
+  tr th:first-child {
+    padding-left: 1em;
+  }
+
+  tr td:last-child,
+  tr th:last-child {
+    padding-right: 1em
+  }
+
+  thead tr:first-child th {
+    padding-top: 1em;
+  }
+
+  tbody tr:last-child td {
+    padding-bottom: 1em;
+  }
+
+  .header {
+    padding-bottom: 0.5em;
+  }
+
+  .divider {
+    padding: 1em 0 0.5em 0;
+  }
+
+  .left-border {
+    border-left: thin solid black;
+  }
+
+  .bottom-border {
+    border-bottom: thin solid black;
+  }
+
+  .gray-bg {
+    background: #ededed;
+  }
+
+  .date {
+    font-size: 0.75em;
+    font-style: italic;
+  }
+
+  pre {
+    white-space: pre-wrap;
+  }
+
+  @media print {
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .order {
+      margin: 0;
+      padding: 0
+    }
+
+    table {
+      font-size: 14px;
+    }
+  }
+</style>
+
 {{#each orders}}
-<div style="margin-bottom: 50px;">
+<div class="order">
   <table>
     <thead>
       <tr>
-        <th>id</th>
-        <th>status</th>
-        <th>payment_status</th>
-        <th>shipment_status</th>
-        <th>name</th>
-        <th>email</th>
-        <th>phone</th>
-        <th>address</th>
-        <th>notes</th>
-        <th>createdAt</th>
-        <th>updatedAt</th>
+        <th align="left" class="header" colspan="2">ORDER #{{this.id}}</th>
+        <th align="right" colspan="4" class="left-border gray-bg">MARSH COOP</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td>{{this.id}}</td>
+        <td>
+          <b>status</b>
+        </td>
         <td>{{this.status}}</td>
-        <td>{{this.payment_status}}</td>
-        <td>{{this.shipment_status}}</td>
-        <td>{{this.name}}</td>
-        <td>{{this.email}}</td>
-        <td>{{this.phone}}</td>
-        <td>{{this.address}}</td>
-        <td>{{this.notes}}</td>
-        <td>{{this.createdAt}}</td>
-        <td>{{this.updatedAt}}</td>
-
+        <td align="right" colspan="4" class="left-border gray-bg">6917 S. Broadway</td>
       </tr>
-    </tbody>
-  </table>
-  <table>
-    <thead>
       <tr>
-        <th>vendor</th>
+        <td>
+          <b>payment</b>
+        </td>
+        <td>{{this.payment_status}}</td>
+        <td align="right" colspan="4" class="left-border gray-bg">St. Louis, MO 63111</td>
+      </tr>
+      <tr>
+        <td>
+          <b>shipment</b>
+        </td>
+        <td>{{this.shipment_status}}</td>
+        <td align="right" colspan="4" class="left-border bottom-border gray-bg header">marshcoop.org</td>
+      </tr>
+
+      {{#if this.User}}
+      <tr>
+        <td colspan="6">
+          <b>created by</b>
+          <span class="date">{{this.User.email}} ({{this.User.role}})</span>
+        </td>
+      </tr>
+      {{/if}}
+
+      <tr>
+        <td colspan="6">
+          <b>created at</b>
+          <span class="date">{{this.createdAt}}</span>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="6">
+          <b>updated at</b>
+          <span class=" date">{{this.updatedAt}}</span>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="6" class="divider"><b>CUSTOMER</b></td>
+      </tr>
+      <tr>
+        <td><b>name</b></td>
+        <td>{{this.name}}</td>
+        <td colspan="4"><b>notes</b></td>
+      </tr>
+      <tr>
+        <td><b>email</b></td>
+        <td>{{this.email}}</td>
+        <td colspan="4" rowspan="3">
+          <pre>{{this.notes}}</pre>
+        </td>
+      </tr>
+      <tr>
+        <td><b>phone</b></td>
+        <td>{{this.phone}}</td>
+      </tr>
+      <tr>
+        <td><b>address</b></td>
+        <td>{{this.address}}</td>
+      </tr>
+
+      <tr>
+        <th colspan="6" align="left" class="divider">LINE ITEMS</th>
+      </tr>
+
+      <tr>
+        <th align="left">vendor</th>
         <th>description</th>
-        <th>qty</th>
-        <th>unit</th>
+        <th align="left">qty</th>
+        <th align="center">unit</th>
         <th align="right">price</th align="right">
         <th align="right">total</th>
       </tr>
-    </thead>
-    <tbody>
+
       {{#each this.OrderLineItems}}
-      <tr>
-        <td>{{this.vendor}}</td>
+      <tr class="li">
+        <td align="center">{{this.vendor}}</td>
         <td>{{this.description}}</td>
-        <td>{{this.quantity}}</td>
-        <td>{{this.selected_unit}}</td>
+        <td align="left">{{this.quantity}}</td>
+        <td align="center">{{this.selected_unit}}</td>
         <td align="right">{{this.price}}</td>
         <td align="right">{{this.total}}</td>
       </tr>
       {{/each}}
       <tr>
-        <td colspan="4"></td>
-        <td colspan="2" align="right">TOTAL</td>
+        <td colspan="5"></td>
+        <td align="center" class="total left-border"><b>TOTAL</b></td>
       </tr>
       <tr>
         <td colspan="5"></td>
-        <td align="right">{{this.total}}</td>
+        <td align="right" class="left-border"><b>{{this.total}}</b></td>
       </tr>
     </tbody>
   </table>

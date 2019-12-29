@@ -28,6 +28,9 @@ module.exports = {
         total: {
           type: Sequelize.DECIMAL(10, 2)
         },
+        subtotal: {
+          type: Sequelize.DECIMAL(10, 2)
+        },
         name: {
           type: Sequelize.STRING,
           allowNull: false
@@ -43,7 +46,10 @@ module.exports = {
           type: Sequelize.STRING
         },
         notes: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
+        },
+        email_sent: {
+          type: Sequelize.BOOLEAN
         },
         history: {
           type: Sequelize.JSONB
@@ -61,9 +67,11 @@ module.exports = {
         }
       })
       .then(() => queryInterface.addIndex('Orders', ['email']))
+      .then(() => queryInterface.addIndex('Orders', ['name']))
       .then(() => queryInterface.addIndex('Orders', ['status']))
       .then(() => queryInterface.addIndex('Orders', ['payment_status']))
       .then(() => queryInterface.addIndex('Orders', ['shipment_status']))
+      .then(() => queryInterface.addIndex('Orders', ['UserId']))
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable('Orders')
