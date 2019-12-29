@@ -19,7 +19,7 @@ services:
       - PG_DATABASE_PASSWORD=${PG_DATABASE_PASSWORD}
       - PG_DATABASE_HOST=pg
       - MAILGUN_API_KEY=${MAILGUN_API_KEY}
-      - MAILGUN_DOMAIN=mg.marshcoop.org
+      - MAILGUN_DOMAIN=${MAILGUN_DOMAIN}
       - MAIL_GOES_TO=hello@marshcoop.org
   pg:
     image: postgres:12-alpine

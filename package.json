@@ -11,9 +11,7 @@
     "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all",
     "db:seed:all": "sequelize-cli db:seed:all",
     "create:admin": "node util/cliCreateAdmin.js",
-    "build": "react-scripts build",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "build": "react-scripts build"
   },
   "author": "edwardsharp",
   "license": "ISC",
