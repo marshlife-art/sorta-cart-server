@@ -23,11 +23,11 @@ const upload = multer({
   }),
   fileFilter: function(req, file, cb) {
     const filetypes = /csv/
-    const mimetype = filetypes.test(file.mimetype)
+    // const mimetype = filetypes.test(file.mimetype)
     const extname = filetypes.test(
       path.extname(file.originalname).toLowerCase()
     )
-    if (!mimetype || !extname) {
+    if (!extname) {
       req.fileValidationError =
         'Error: Product upload only supports .csv files!'
       return cb(null, false, new Error(req.fileValidationError))
