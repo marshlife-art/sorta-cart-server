@@ -6,6 +6,7 @@ server {
 
   location / {
     return 301 https://${BASE_SERVER};
+    log_not_found off;
   }
 }
 
@@ -22,5 +23,6 @@ server {
     proxy_pass http://${BASE_SERVER_PROXY}:${BASE_SERVER_PORT};
     client_max_body_size 100m;
     proxy_buffering off;
+    log_not_found off;
   }
 }

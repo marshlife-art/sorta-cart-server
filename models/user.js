@@ -42,6 +42,18 @@ module.exports = (sequelize, DataTypes) => {
     return reg_key
   }
 
+  User.prototype.generateAuthKey = function() {
+    const auth_key = crypto.randomBytes(32).toString('hex')
+    this.setDataValue('auth_key', auth_key)
+    this.save()
+    return auth_key
+  }
+
+  User.prototype.logout = function() {
+    this.setDataValue('auth_key', null)
+    this.save()
+  }
+
   User.associate = function(models) {
     User.hasMany(models.Order)
     User.hasOne(models.Member)

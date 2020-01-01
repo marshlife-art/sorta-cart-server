@@ -12,13 +12,17 @@ const jwtOptions = {
   jwtFromRequest: passportJWT.ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET
 }
-const strategy = new passportJWT.Strategy(jwtOptions, function(
+const strategy = new passportJWT.Strategy(jwtOptions, async function(
   jwt_payload,
   next
 ) {
-  let user = getUser({ id: jwt_payload.id })
-  if (user) {
-    next(null, user)
+  if (jwt_payload.auth_key) {
+    const user = await getUser({ auth_key: jwt_payload.auth_key })
+    if (user) {
+      next(null, user)
+    } else {
+      next(null, false)
+    }
   } else {
     next(null, false)
   }
@@ -29,6 +33,8 @@ const app = express()
 
 const corsOptions = {
   origin: [
+    'https://admin.marshcoop.org',
+    'https://marshcoop.org',
     'http://localhost:3001',
     'http://localhost:3002',
     'http://localhost:3000',
