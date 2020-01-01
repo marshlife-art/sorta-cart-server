@@ -32,10 +32,7 @@ module.exports = function(passport) {
     const { email, password } = req.body
     if (email && password) {
       const user = await getUser({ email: email })
-      if (!user) {
-        res.status(401).json({ message: 'No such user found' })
-      }
-      if (user.validPassword(password)) {
+      if (user && user.validPassword(password)) {
         const auth_key = user.auth_key ? user.auth_key : user.generateAuthKey()
         const payload = { id: user.id, auth_key }
         const token = jwt.sign(payload, process.env.JWT_SECRET)
@@ -48,8 +45,10 @@ module.exports = function(passport) {
           }
         })
       } else {
-        res.status(401).json({ msg: 'Password is incorrect' })
+        res.status(401).json({ message: 'Invalid user or password.' })
       }
+    } else {
+      res.status(401).json({ message: 'Invalid user or password.' })
     }
   })
 
