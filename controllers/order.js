@@ -59,7 +59,7 @@ module.exports = function(passport) {
         .catch(err =>
           res
             .status(500)
-            .json({ error: true, msg: `unable to create order err: ${err}` })
+            .json({ error: true, msg: `unable to update order err: ${err}` })
         )
     }
   )

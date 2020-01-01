@@ -52,27 +52,34 @@ const updateOrder = async order => {
     throw new Error('no such order id exist to update!')
   }
 
-  return await Order.findOne(
-    { where: { id: order.id } },
-    { include: [OrderLineItem] }
-  ).then(async o => {
-    await o.update(order)
-    // so, need to clear all the order line items first. in case one is removed...
-    // #TODO: deal with possibly orphaned oliz in the db
-    //  maybe find all that have null OrderID && WholesaleOrderId and destroy?? :/ :/ :/
-    await o.setOrderLineItems([])
-    order.OrderLineItems.forEach(async li => {
-      if (li.id) {
-        await OrderLineItem.findOne({ where: { id: li.id } }).then(oli =>
-          oli.update(li)
-        )
-      } else {
-        const newoli = await OrderLineItem.create(li)
-        await o.addOrderLineItem(newoli)
+  const o = await Order.findOne({
+    where: { id: order.id },
+    include: [OrderLineItem]
+  })
+
+  // to avoid orphaned order line items from collecting in the db
+  // first destroy all the line items for this order `o`, then re-created
+  // with all the line items being submitted `order`.
+  const line_items = o.OrderLineItems.map(oli => oli.id)
+
+  if (line_items && line_items.length) {
+    await OrderLineItem.destroy({
+      where: {
+        id: { [Op.or]: line_items }
       }
     })
-    return o
+  }
+
+  await o.update(order)
+
+  await o.setOrderLineItems([])
+
+  order.OrderLineItems.forEach(async li => {
+    const newoli = await OrderLineItem.create(li)
+    await o.addOrderLineItem(newoli)
   })
+
+  return o
 }
 
 const getOrdersByIds = async orderIds => {
