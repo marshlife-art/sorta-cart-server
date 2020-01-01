@@ -13,8 +13,11 @@ module.exports = function(passport) {
         .then(user => {
           // from now on we'll identify the user by the id and the id is the
           // only personalized value that goes the jwt token
-          let payload = { id: user.id }
-          let token = jwt.sign(payload, process.env.JWT_SECRET)
+          const auth_key = user.auth_key
+            ? user.auth_key
+            : user.generateAuthKey()
+          const payload = { id: user.id, auth_key }
+          const token = jwt.sign(payload, process.env.JWT_SECRET)
           res.json({
             msg: 'ok',
             user: {
