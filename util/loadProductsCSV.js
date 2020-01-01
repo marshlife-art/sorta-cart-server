@@ -89,7 +89,7 @@ module.exports = (csv_path, import_tag, vendor, markup) => {
             // if the first and only field is something, then it's probably a category.
             cat = data['unf']
           } else if (Object.values(data).filter(String).length) {
-            data['category'] = cat
+            data['category'] = data['category'] || cat
 
             // aggregate codes cols into single col
             let codes = []
