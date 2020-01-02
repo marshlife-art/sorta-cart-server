@@ -1,6 +1,6 @@
 {
   "name": "sorta-cart-server",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "API for sorta-cart",
   "main": "server.js",
   "scripts": {
@@ -13,6 +13,7 @@
     "create:admin": "node util/cliCreateAdmin.js",
     "build": "react-scripts build"
   },
+  "repository": "github:marshlife-art/sorta-cart-server",
   "author": "edwardsharp",
   "license": "ISC",
   "dependencies": {

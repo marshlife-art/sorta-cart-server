@@ -17,7 +17,7 @@ module.exports = function(passport) {
     '/wholesaleorders',
     passport.authenticate('jwt', { session: false }),
     function(req, res) {
-      getWholesaleOrders(req.body.status).then(result =>
+      getWholesaleOrders(req.body).then(result =>
         res.json({
           data: result.rows,
           page: req.body && req.body.page ? req.body.page : 0,

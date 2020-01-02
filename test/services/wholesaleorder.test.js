@@ -16,7 +16,7 @@ describe('services', function() {
     })
 
     it('should get wholesale orders with status param', async function() {
-      const wholesaleorders = await getWholesaleOrders('new')
+      const wholesaleorders = await getWholesaleOrders({ status: 'new' })
       assert.equal(wholesaleorders.count, 1)
       assert.equal(wholesaleorders.rows.length, 1)
     })

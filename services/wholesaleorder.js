@@ -8,11 +8,18 @@ const Op = models.Sequelize.Op
 // using sqlite in test env so no iLike :/
 const iLike = process.env.NODE_ENV === 'test' ? Op.like : Op.iLike
 
-const getWholesaleOrders = async status => {
-  status = status || 'new'
-  findParams = {
-    where: { status },
-    attributes: ['id', 'vendor', 'createdAt', 'status']
+const getWholesaleOrders = async query => {
+  const status = query.status || ['new', 'needs_review', 'pending']
+
+  const limit = query.pageSize || 50
+  const orderBy = (query.orderBy && query.orderBy.field) || 'id'
+  const orderDirection = query.orderDirection || 'DESC'
+  let findParams = {
+    limit: limit,
+    where: { status }
+  }
+  if (orderBy) {
+    findParams.order = [[orderBy, orderDirection]]
   }
 
   return await WholesaleOrder.findAndCountAll(findParams)
