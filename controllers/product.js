@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const multer = require('multer')
 const path = require('path')
+const fs = require('fs')
 
 const {
   getProducts,
@@ -125,6 +126,7 @@ module.exports = function(passport) {
       } else {
         const { vendor, import_tag, prev_import_tag, markup } = req.body
         if (!vendor || !import_tag) {
+          fs.unlink(req.file.path, () => {})
           res.status(500).json({
             error: true,
             msg: `You must include a vendor and import tag string!`
@@ -144,6 +146,9 @@ module.exports = function(passport) {
                 msg: `Unable to import products! ${err}`
               })
             )
+            .finally(() => {
+              fs.unlink(req.file.path, () => {})
+            })
         }
       }
     }
