@@ -74,6 +74,19 @@ module.exports = function(passport) {
     )
   })
 
+  router.post('/sub_categories', function(req, res) {
+    return getSubCategories(req.body).then(result =>
+      res.json(
+        result
+          .map(r => r['DISTINCT'])
+          .reduce((acc, cur) => {
+            acc[cur] = cur
+            return acc
+          }, {})
+      )
+    )
+  })
+
   router.post(
     '/products/destroy',
     passport.authenticate('jwt', { session: false }),

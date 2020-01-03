@@ -12,13 +12,24 @@ const getProducts = async query => {
 
   const q = query.search || ''
   if (q) {
-    // category sub_category name description
-    findParams.where[Op.or] = [
-      { name: { [iLike]: `%${q}%` } },
-      { description: { [iLike]: `%${q}%` } },
+    const filters = [
+      {
+        name: { [Op.and]: q.split(' ').map(val => ({ [iLike]: `%${val}%` })) }
+      },
+      {
+        description: {
+          [Op.and]: q.split(' ').map(val => ({ [iLike]: `%${val}%` }))
+        }
+      },
       { sub_category: { [iLike]: `%${q}%` } },
       { category: { [iLike]: `%${q}%` } }
     ]
+
+    if (findParams.where[Op.or] && findParams.where[Op.or].length) {
+      findParams.where[Op.or].push(filters)
+    } else {
+      findParams.where[Op.or] = filters
+    }
   }
 
   return await Product.findAndCountAll(findParams)
@@ -27,8 +38,17 @@ const getProducts = async query => {
 const getCategories = async () =>
   Product.aggregate('category', 'DISTINCT', { plain: false })
 
-const getSubCategories = async () =>
-  Product.aggregate('sub_category', 'DISTINCT', { plain: false })
+const getSubCategories = async reqBody => {
+  const { categories } = reqBody || {}
+  if (categories && categories.length) {
+    return Product.aggregate('sub_category', 'DISTINCT', {
+      plain: false,
+      where: { category: { [Op.or]: categories } }
+    })
+  } else {
+    return Product.aggregate('sub_category', 'DISTINCT', { plain: false })
+  }
+}
 
 const destroyProducts = async ids => {
   return await Product.destroy({

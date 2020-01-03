@@ -3,7 +3,6 @@ const Op = require('sequelize').Op
 const iLike = process.env.NODE_ENV === 'test' ? Op.like : Op.iLike
 
 const findParamsFor = query => {
-  // console.log('findParamsFor query:', query)
   const limit = query.pageSize || 50
   const page = query.page || 0
   const orderBy = (query.orderBy && query.orderBy.field) || 'id'
@@ -20,7 +19,6 @@ const findParamsFor = query => {
 
   if (query.filters && query.filters.length) {
     // map all filters into a buncha WHEREz
-    // ...this is pretty gnarly ¯\_(ツ)_/¯
     query.filters.forEach(filter => {
       if (
         filter.column &&
@@ -28,46 +26,36 @@ const findParamsFor = query => {
         filter.value &&
         filter.value.length
       ) {
+        let filters = undefined
         if (filter.column.field === 'codes') {
-          let codeFilters = filter.value.map(val => ({
-            codes: { [iLike]: `%${val}%` }
-          }))
-          if (findParams.where[Op.or] && findParams.where[Op.or].length) {
-            findParams.where[Op.or].push(codeFilters)
-          } else {
-            findParams.where[Op.or] = codeFilters
-          }
-        } else if (
-          filter.column.field === 'category' ||
-          filter.column.field === 'sub_category'
-        ) {
-          let catFilters = filter.value.map(val => ({
-            [filter.column.field]: val
-          }))
-          if (findParams.where[Op.or] && findParams.where[Op.or].length) {
-            findParams.where[Op.or].push(catFilters)
-          } else {
-            findParams.where[Op.or] = catFilters
+          filters = {
+            codes: {
+              [Op.or]: filter.value.map(val => ({ [iLike]: `%${val}%` }))
+            }
           }
         } else if (Array.isArray(filter.value)) {
-          let filters = filter.value.map(val => ({
-            [filter.column.field]: val
-          }))
-          // if (findParams.where[Op.and] && findParams.where[Op.and].length) {
-          //   findParams.where[Op.and].push(filters)
-          // } else {findParams.where[Op.and] = filters}
-          findParams.where[Op.and] = filters
+          filters = {
+            [filter.column.field]: { [Op.or]: filter.value }
+          }
         } else {
-          findParams.where[filter.column.field] = filter.value
+          filters = {
+            [filter.column.field]: filter.value
+          }
+        }
+
+        if (
+          filters &&
+          findParams.where[Op.and] &&
+          findParams.where[Op.and].length
+        ) {
+          findParams.where[Op.and].push(filters)
+        } else if (filters) {
+          findParams.where[Op.and] = [filters]
         }
       }
     })
   }
 
-  // console.log(
-  //   'findParamsFor gonna return findParams:',
-  //   JSON.stringify(findParams)
-  // )
   return findParams
 }
 
