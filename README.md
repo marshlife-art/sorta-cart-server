@@ -87,3 +87,61 @@ generate some models:
 `npx sequelize-cli model:generate --name Page --attributes href:string,content:text`
 
 `npx sequelize-cli model:generate --name Member --attributes name:string,phone:string,address:string,discount:number,fees_paid:number,store_credit:number,shares:number,member_type:string`
+
+### coreos notes
+
+#### CORE OS DOCKER SERVICE
+
+this will restart docker containers if the coreos instance restarts (like, for upgradez)
+
+```sh
+sudo systemctl enable docker.service
+sudo systemctl start docker.service
+```
+
+#### swap
+
+very useful for micro instances w/o much RAM
+
+https://coreos.com/os/docs/latest/adding-swap.html
+
+**as root:**
+
+```sh
+mkdir -p /var/vm
+fallocate -l 1024m /var/vm/swapfile1
+chmod 600 /var/vm/swapfile1
+mkswap /var/vm/swapfile1
+```
+
+vi /etc/systemd/system/var-vm-swapfile1.swap
+
+```
+[Unit]
+Description=Turn on swap
+
+[Swap]
+What=/var/vm/swapfile1
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```sh
+systemctl enable --now var-vm-swapfile1.swap
+```
+
+**Optionally**
+
+```sh
+echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/80-swappiness.conf
+systemctl restart systemd-sysctl
+```
+
+see:
+
+```
+$ swapon
+NAME              TYPE       SIZE USED PRIO
+/var/vm/swapfile1 file      1024M   0B   -1
+```
