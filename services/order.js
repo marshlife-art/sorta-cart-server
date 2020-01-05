@@ -41,6 +41,7 @@ const createOrder = async order => {
   delete order.id
   delete order.createdAt
   delete order.updatedAt
+  order.OrderLineItems.map(oli => delete oli.id)
   return await Order.create(order, { include: [OrderLineItem] })
 }
 

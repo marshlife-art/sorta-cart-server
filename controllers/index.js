@@ -10,6 +10,7 @@ module.exports = function(passport) {
   router.use('/', require('./product')(passport))
   router.use('/', require('./order')(passport))
   router.use('/', require('./wholesaleorder')(passport))
+  router.use('/', require('./store')(passport))
 
   router.get('/', function(req, res) {
     res.json({ MARSH: 'COOP', APP_VERSION, 'MADE WITH': '♥ in NYC' })
