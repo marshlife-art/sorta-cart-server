@@ -21,6 +21,7 @@ module.exports = function(passport) {
           res.json({
             msg: 'ok',
             user: {
+              id: user.id,
               email: user.email,
               role: user.role,
               token: token
@@ -42,6 +43,7 @@ module.exports = function(passport) {
         res.json({
           msg: 'ok',
           user: {
+            id: user.id,
             email: user.email,
             role: user.role,
             token: token

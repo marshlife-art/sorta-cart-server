@@ -4,7 +4,8 @@ const {
   createMember,
   upsertMember,
   getMembers,
-  destroyMember
+  destroyMember,
+  getMember
 } = require('../services/member')
 
 module.exports = function(passport) {
@@ -60,6 +61,16 @@ module.exports = function(passport) {
             msg: `o noz! unable to destroy member ${err}`
           })
         )
+    }
+  )
+
+  router.get(
+    '/member/me',
+    passport.authenticate('jwt', { session: false }),
+    function(req, res) {
+      getMember({ UserId: req.user.id })
+        .then(member => res.json({ member }))
+        .catch(err => res.json({ error: true, msg: err }))
     }
   )
 
