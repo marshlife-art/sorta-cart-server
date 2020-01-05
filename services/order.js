@@ -5,6 +5,7 @@ const Order = models.Order
 const OrderLineItem = models.OrderLineItem
 const User = models.User
 const Member = models.Member
+const Product = models.Product
 const Op = models.Sequelize.Op
 // using sqlite in test env so no iLike :/
 const iLike = process.env.NODE_ENV === 'test' ? Op.like : Op.iLike
@@ -94,10 +95,73 @@ const getOrdersByIds = async orderIds => {
   })
 }
 
+const validateLineItems = async lineItems => {
+  // console.log('validateLineItems lineItems:', lineItems)
+  // #TOOOOOODOOOOOO :/
+
+  return new Promise(resolve => {
+    // let invalidLineItems = []
+    // lineItems.forEach(async li => {
+    //   if (
+    //     li.kind !== 'product' ||
+    //     li.kind !== 'tax' ||
+    //     li.kind !== 'adjustment'
+    //   ) {
+    //     invalidLineItems.push(li)
+    //     return
+    //   }
+    //   if (li.kind === 'product') {
+    //     if (li.price <= 0 || li.total <= 0 || li.quantity <= 0) {
+    //       invalidLineItems.push(li)
+    //       return
+    //     }
+    //     if (!li.data || !li.data.product || !li.data.product.id) {
+    //       invalidLineItems.push(li)
+    //       return
+    //     }
+    //     const product = await Product.findOne({
+    //       where: { id: li.data.product.id }
+    //     })
+    //     if (!product && (product.unf || product.upc_code)) {
+    //       const maybeItWasRecreated = await Product.findOne({
+    //         where: {
+    //           [Op.or]: [{ unf: product.unf }, { upc_code: product.upc_code }]
+    //         }
+    //       })
+    //       if (!maybeItWasRecreated) {
+    //         invalidLineItems.push(li)
+    //         return
+    //       }
+    //       if (
+    //         maybeItWasRecreated.ws_price !== li.data.product.ws_price ||
+    //         maybeItWasRecreated.u_price !== li.data.product.u_price
+    //       ) {
+    //         invalidLineItems.push(li)
+    //         return
+    //       }
+    //     }
+    //     if (
+    //       product.ws_price !== li.data.product.ws_price ||
+    //       product.u_price !== li.data.product.u_price
+    //     ) {
+    //       invalidLineItems.push(li)
+    //       return
+    //     }
+    //   }
+    // })
+
+    resolve({
+      error: false,
+      invalidLineItems: []
+    })
+  })
+}
+
 module.exports = {
   getOrders,
   getOrder,
   createOrder,
   updateOrder,
-  getOrdersByIds
+  getOrdersByIds,
+  validateLineItems
 }
