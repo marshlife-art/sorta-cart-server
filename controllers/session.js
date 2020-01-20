@@ -1,18 +1,72 @@
 const router = require('express').Router()
 const jwt = require('jsonwebtoken')
 
-const { getUser, registerUser } = require('../services/user')
+const {
+  getUser,
+  confirmUser,
+  registerMember,
+  isEmailAvailable
+} = require('../services/user')
+const { createMember } = require('../services/member')
 
 module.exports = function(passport) {
-  router.post('/register', function(req, res, next) {
-    const { regKey, password } = req.body
+  router.post('/register/check', async function(req, res) {
+    const { email } = req.body
+    res.send({ valid: await isEmailAvailable(email) })
+  })
+
+  router.post('/register', async function(req, res) {
+    try {
+      const { user, member } = req.body
+      if (
+        !user ||
+        !user.email ||
+        !user.password ||
+        !member ||
+        !member.name ||
+        !member.phone
+      ) {
+        res.status(500)
+        res.send({ error: 'missing required fields.' })
+        return
+      }
+
+      // #TODO: validate payment.
+
+      const newUser = await registerMember(user.email, user.password)
+      member.UserId = newUser.id
+      member.registration_email = newUser.email
+      await createMember(member)
+
+      const auth_key = newUser.auth_key
+        ? newUser.auth_key
+        : newUser.generateAuthKey()
+      const payload = { id: newUser.id, auth_key }
+      const token = jwt.sign(payload, process.env.JWT_SECRET)
+      res.json({
+        msg: 'ok',
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          role: newUser.role,
+          token: token
+        }
+      })
+    } catch (e) {
+      console.warn('[session] /register caught error:', e)
+      res.status(500)
+      res.send({ error: true })
+    }
+  })
+
+  router.post('/confirm', function(req, res, next) {
+    const { regKey } = req.body
     if (!regKey) {
       res.json({ error: true, msg: 'no registration key' })
     } else {
-      registerUser(regKey, password)
+      confirmUser(regKey)
         .then(user => {
-          // from now on we'll identify the user by the id and the id is the
-          // only personalized value that goes the jwt token
+          // go ahead a auth user
           const auth_key = user.auth_key
             ? user.auth_key
             : user.generateAuthKey()

@@ -9,7 +9,7 @@ const mailgun = require('mailgun-js')({
       : process.env.TEST_MAILGUN_DOMAIN
 })
 
-const sendRegistrationEmail = (email, regKey) => {
+const sendConfirmationEmail = (email, regKey) => {
   return new Promise(function(resolve, reject) {
     if (process.env.NODE_ENV === 'test') {
       // fuhgeddaboudit!
@@ -20,7 +20,31 @@ const sendRegistrationEmail = (email, regKey) => {
           from: 'MARSH COOP <noreply@marshcoop.org>',
           to: email,
           subject: 'Confirm your email',
-          text: `Use this link to confirm your email and complete the registration process. https://admin.marshcoop.org/register?regKey=${regKey}`
+          text: `Use this link to confirm your email: https://marshcoop.org/confirm?regKey=${regKey}`
+        },
+        function(error, body) {
+          console.log(body)
+          error ? reject(error) : resolve()
+        }
+      )
+    } else {
+      reject('invalid user')
+    }
+  })
+}
+
+const sendAdminRegistrationEmail = (email, regKey) => {
+  return new Promise(function(resolve, reject) {
+    if (process.env.NODE_ENV === 'test') {
+      // fuhgeddaboudit!
+      resolve()
+    } else if (email && regKey) {
+      mailgun.messages().send(
+        {
+          from: 'MARSH COOP <noreply@marshcoop.org>',
+          to: email,
+          subject: 'Confirm your email',
+          text: `Use this link to confirm your email and complete the registration process. https://admin.marshcoop.org/confirm?regKey=${regKey}`
         },
         function(error, body) {
           console.log(body)
@@ -34,5 +58,6 @@ const sendRegistrationEmail = (email, regKey) => {
 }
 
 module.exports = {
-  sendRegistrationEmail
+  sendConfirmationEmail,
+  sendAdminRegistrationEmail
 }

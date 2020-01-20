@@ -1,6 +1,9 @@
 const findParamsFor = require('../util/findParamsFor')
 const models = require('../models')
-const { sendRegistrationEmail } = require('../mailers/user_mailer')
+const {
+  sendConfirmationEmail,
+  sendAdminRegistrationEmail
+} = require('../mailers/user_mailer')
 
 const User = models.User
 const Op = models.Sequelize.Op
@@ -9,7 +12,11 @@ const iLike = process.env.NODE_ENV === 'test' ? Op.like : Op.iLike
 
 const createUser = async ({ email, role }) => {
   const user = await User.create({ email, role })
-  await sendRegistrationEmail(user.email, user.reg_key)
+  try {
+    await sendAdminRegistrationEmail(user.email, user.reg_key)
+  } catch (err) {
+    console.warn('onoz! sendAdminRegistrationEmail caught error:', err)
+  }
   return user
 }
 
@@ -37,9 +44,8 @@ const destroyUser = async ({ id }) => {
   return await User.destroy({ where: { id: id } })
 }
 
-const registerUser = async (reg_key, password) => {
+const confirmUser = async reg_key => {
   return await User.findOne({ where: { reg_key } }).then(user => {
-    user.password = password
     user.reg_key = null
     user.email_confirmed = true
     user.active = true
@@ -47,4 +53,26 @@ const registerUser = async (reg_key, password) => {
   })
 }
 
-module.exports = { createUser, getUser, getUsers, destroyUser, registerUser }
+const registerMember = async (email, password) => {
+  const newUser = await User.create({ email, password, role: 'member' })
+  try {
+    await sendConfirmationEmail(newUser.email, newUser.reg_key)
+  } catch (err) {
+    console.warn('onoz! cound not sendConfirmationEmail! caught error:', err)
+  }
+  return newUser
+}
+
+const isEmailAvailable = async email => {
+  return User.count({ where: { email } }).then(count => count === 0)
+}
+
+module.exports = {
+  createUser,
+  getUser,
+  getUsers,
+  destroyUser,
+  registerMember,
+  confirmUser,
+  isEmailAvailable
+}

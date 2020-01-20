@@ -135,7 +135,7 @@ module.exports = function(passport) {
     upload.single('file'),
     function(req, res, next) {
       if (req.fileValidationError) {
-        res.send(req.fileValidationError)
+        res.send({ error: req.fileValidationError })
       } else {
         const { vendor, import_tag, prev_import_tag, markup } = req.body
         if (!vendor || !import_tag) {

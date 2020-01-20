@@ -12,7 +12,10 @@ const createMember = async member => {
     return
   }
   delete member.id
-  return await Member.create(member)
+  return await Member.create({
+    ...member,
+    phone: member.phone.match(/[0-9]+/g).join('')
+  })
 }
 
 const upsertMember = async member => {

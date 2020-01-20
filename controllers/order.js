@@ -74,7 +74,7 @@ module.exports = function(passport) {
           res.render('orders', { orders })
         })
         .catch(err =>
-          res.status(500).send(`unable to print orders err: ${err}`)
+          res.status(500).send({ error: `unable to print orders err: ${err}` })
         )
     }
   )

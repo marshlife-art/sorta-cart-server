@@ -70,6 +70,12 @@ app.set('view engine', 'handlebars')
 // init all the controllerz/routez:
 app.use('/', require('./controllers')(passport))
 
+// since this is the last route def, if nothing matched before it, it's a 404
+app.use(function(req, res) {
+  res.status(404)
+  res.send({ error: 'not found' })
+})
+
 const port = process.env.PORT || 3000
 app.listen(port, function() {
   console.log(`sorta-cart-server is running on port ${port}`)

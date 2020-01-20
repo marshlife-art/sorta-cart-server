@@ -38,11 +38,13 @@ const getOrder = async id => {
   })
 }
 
-const createOrder = async order => {
+const createOrder = async reqBody => {
+  const { order, nonce } = reqBody
   delete order.id
   delete order.createdAt
   delete order.updatedAt
   order.OrderLineItems.map(oli => delete oli.id)
+  // #TODO: validate nonce
   return await Order.create(order, { include: [OrderLineItem] })
 }
 
