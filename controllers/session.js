@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const jwt = require('jsonwebtoken')
+const { createPayment } = require('../services/square_payments')
 
 const {
   getUser,
@@ -17,26 +18,43 @@ module.exports = function(passport) {
 
   router.post('/register', async function(req, res) {
     try {
-      const { user, member } = req.body
+      const { user, member, nonce } = req.body
       if (
         !user ||
         !user.email ||
         !user.password ||
         !member ||
         !member.name ||
-        !member.phone
+        !member.phone ||
+        !member.fees_paid ||
+        !nonce
       ) {
         res.status(500)
         res.send({ error: 'missing required fields.' })
         return
       }
 
-      // #TODO: validate payment.
+      try {
+        const paymentResponse = await createPayment(
+          nonce,
+          member.fees_paid * 100
+        )
+        console.log('[session] register paymentResponse:', paymentResponse)
+      } catch (e) {
+        res.status(500)
+        res.send({ error: 'payment error' })
+        console.warn('onoz! caught error in createPayment error:', error)
+        return
+      }
 
       const newUser = await registerMember(user.email, user.password)
-      member.UserId = newUser.id
-      member.registration_email = newUser.email
-      await createMember(member)
+
+      await createMember({
+        ...member,
+        UserId: newUser.id,
+        registration_email: newUser.email,
+        shares: 1
+      })
 
       const auth_key = newUser.auth_key
         ? newUser.auth_key
