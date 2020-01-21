@@ -29,6 +29,7 @@ module.exports = function(passport) {
 
     createOrder({
       ...order,
+      payment_status: 'paid',
       OrderLineItems: [
         ...order.OrderLineItems,
         {
