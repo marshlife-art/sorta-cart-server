@@ -15,7 +15,11 @@ module.exports = function(passport) {
 
     let paymentResponse = undefined
     try {
-      paymentResponse = await createPayment(nonce, order.total * 100)
+      paymentResponse = await createPayment(
+        nonce,
+        order.total * 100,
+        `Order Payment ${order.name} ${order.email}`
+      )
       console.log('[store/checkout] order paymentResponse:', paymentResponse)
     } catch (e) {
       res.status(500)

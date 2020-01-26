@@ -57,7 +57,32 @@ const sendAdminRegistrationEmail = (email, regKey) => {
   })
 }
 
+const sendPasswordResetEmail = (email, regKey) => {
+  return new Promise(function(resolve, reject) {
+    if (process.env.NODE_ENV === 'test') {
+      // fuhgeddaboudit!
+      resolve()
+    } else if (email && regKey) {
+      mailgun.messages().send(
+        {
+          from: 'MARSH COOP <noreply@marshcoop.org>',
+          to: email,
+          subject: 'Reset password',
+          text: `Use this link to reset your password: https://marshcoop.org/resetpassword?regKey=${regKey}`
+        },
+        function(error, body) {
+          console.log(body)
+          error ? reject(error) : resolve()
+        }
+      )
+    } else {
+      reject('invalid user')
+    }
+  })
+}
+
 module.exports = {
   sendConfirmationEmail,
-  sendAdminRegistrationEmail
+  sendAdminRegistrationEmail,
+  sendPasswordResetEmail
 }

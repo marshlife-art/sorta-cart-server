@@ -12,7 +12,7 @@ oauth2.accessToken = process.env.SQUARE_TOKEN
 defaultClient.basePath = 'https://connect.squareupsandbox.com'
 //process.env.NODE_ENV === 'production' ? 'https://connect.squareup.com' : 'https://connect.squareupsandbox.com'
 
-async function createPayment(nonce, amountCents) {
+async function createPayment(nonce, amountCents, note) {
   // length of idempotency_key should be less than 45
   const idempotency_key = crypto.randomBytes(22).toString('hex')
 
@@ -24,6 +24,7 @@ async function createPayment(nonce, amountCents) {
       amount: amountCents,
       currency: 'USD'
     },
+    note: note,
     idempotency_key: idempotency_key
   }
 

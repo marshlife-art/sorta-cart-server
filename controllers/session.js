@@ -9,8 +9,64 @@ const {
   isEmailAvailable
 } = require('../services/user')
 const { createMember } = require('../services/member')
+const { sendPasswordResetEmail } = require('../mailers/user_mailer')
 
 module.exports = function(passport) {
+  router.post('/forgotpassword', async function(req, res) {
+    const { email } = req.body
+    const user = await getUser({ email })
+    if (user) {
+      if (!user.reg_key) {
+        user.generateRegKey()
+        user.save()
+      }
+      try {
+        await sendPasswordResetEmail(email, user.reg_key)
+        res.send({ msg: 'ok' })
+      } catch (e) {
+        res.send({ error: 'unable to send reset email!' })
+      }
+      return
+    }
+
+    res.status(500)
+    res.send({ error: 'unknown user' })
+    return
+  })
+
+  router.post('/resetpassword', async function(req, res) {
+    const { regKey, password } = req.body
+
+    if (regKey && regKey.length && password) {
+      const user = await getUser({ reg_key: regKey })
+      try {
+        user.password = password
+        user.reg_key = null
+        user.save()
+
+        const auth_key = user.auth_key ? user.auth_key : user.generateAuthKey()
+        const payload = { id: user.id, auth_key }
+        const token = jwt.sign(payload, process.env.JWT_SECRET)
+        res.json({
+          msg: 'ok',
+          user: {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            token: token
+          }
+        })
+      } catch (e) {
+        res.send({ error: 'unable to reset password!' })
+      }
+      return
+    }
+
+    res.status(500)
+    res.send({ error: 'unknown user' })
+    return
+  })
+
   router.post('/register/check', async function(req, res) {
     const { email } = req.body
     res.send({ valid: await isEmailAvailable(email) })
@@ -37,7 +93,8 @@ module.exports = function(passport) {
       try {
         const paymentResponse = await createPayment(
           nonce,
-          member.fees_paid * 100
+          member.fees_paid * 100,
+          `Member Registration ${member.name} ${user.email}`
         )
         console.log('[session] register paymentResponse:', paymentResponse)
       } catch (e) {
