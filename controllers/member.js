@@ -8,6 +8,8 @@ const {
   getMember
 } = require('../services/member')
 
+const { createUser } = require('../services/user')
+
 module.exports = function(passport) {
   router.post(
     '/members',
@@ -26,9 +28,23 @@ module.exports = function(passport) {
   router.post(
     '/member/create',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
-      const { member } = req.body
-      createMember(member)
+    async function(req, res) {
+      const { member, createNewUser } = req.body
+      let newUser
+      if (createNewUser) {
+        try {
+          newUser = await createUser({
+            email: member.registration_email,
+            role: 'member'
+          })
+        } catch (e) {
+          // meh.
+        }
+      }
+      createMember({
+        ...member,
+        UserId: newUser && newUser.id ? newUser.id : undefined
+      })
         .then(member => res.json({ member, msg: 'member created!' }))
         .catch(err => {
           console.warn('o noz, caught error creating member err:', err)
@@ -40,9 +56,23 @@ module.exports = function(passport) {
   router.post(
     '/member/update',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
-      const { member } = req.body
-      upsertMember(member)
+    async function(req, res) {
+      const { member, createNewUser } = req.body
+      let newUser
+      if (createNewUser) {
+        try {
+          newUser = await createUser({
+            email: member.registration_email,
+            role: 'member'
+          })
+        } catch (e) {
+          // eh...
+        }
+      }
+      upsertMember({
+        ...member,
+        UserId: newUser && newUser.id ? newUser.id : undefined
+      })
         .then(member => res.json({ member, msg: 'member updated!' }))
         .catch(err => res.json({ error: true, msg: err }))
     }
