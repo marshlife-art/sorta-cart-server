@@ -8,7 +8,7 @@ const {
   getMember
 } = require('../services/member')
 
-const { createUser } = require('../services/user')
+const { createNewMemberUser } = require('../services/user')
 
 module.exports = function(passport) {
   router.post(
@@ -33,10 +33,7 @@ module.exports = function(passport) {
       let newUser
       if (createNewUser) {
         try {
-          newUser = await createUser({
-            email: member.registration_email,
-            role: 'member'
-          })
+          newUser = await createNewMemberUser(member.registration_email)
         } catch (e) {
           // meh.
         }
@@ -61,10 +58,7 @@ module.exports = function(passport) {
       let newUser
       if (createNewUser) {
         try {
-          newUser = await createUser({
-            email: member.registration_email,
-            role: 'member'
-          })
+          newUser = await createNewMemberUser(member.registration_email)
         } catch (e) {
           // eh...
         }

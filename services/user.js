@@ -53,6 +53,10 @@ const confirmUser = async reg_key => {
   })
 }
 
+const createNewMemberUser = async email => {
+  return await User.create({ email, role: 'member' })
+}
+
 const registerMember = async (email, password) => {
   const newUser = await User.create({ email, password, role: 'member' })
   try {
@@ -74,5 +78,6 @@ module.exports = {
   destroyUser,
   registerMember,
   confirmUser,
-  isEmailAvailable
+  isEmailAvailable,
+  createNewMemberUser
 }
