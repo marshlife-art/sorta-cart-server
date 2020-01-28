@@ -35,10 +35,7 @@ const corsOptions = {
   origin: [
     'https://admin.marshcoop.org',
     'https://marshcoop.org',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'http://localhost:3000',
-    'https://marshlife-art.github.io'
+    'https://www.marshcoop.org'
   ],
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204, i guess.
 }
