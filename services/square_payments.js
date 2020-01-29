@@ -9,8 +9,7 @@ oauth2.accessToken = process.env.SQUARE_TOKEN
 // Set 'basePath' to switch between sandbox env and production env
 // sandbox: https://connect.squareupsandbox.com
 // production: https://connect.squareup.com
-defaultClient.basePath = 'https://connect.squareupsandbox.com'
-//process.env.NODE_ENV === 'production' ? 'https://connect.squareup.com' : 'https://connect.squareupsandbox.com'
+defaultClient.basePath = process.env.SQUARE_URL
 
 async function createPayment(nonce, amountCents, note) {
   // length of idempotency_key should be less than 45
@@ -25,7 +24,8 @@ async function createPayment(nonce, amountCents, note) {
       currency: 'USD'
     },
     note: note,
-    idempotency_key: idempotency_key
+    idempotency_key: idempotency_key,
+    location_id: process.env.SQUARE_LOCATION_ID
   }
 
   return await payments_api.createPayment(request_body)
