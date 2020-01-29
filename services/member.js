@@ -54,6 +54,7 @@ const destroyMember = async id => {
   const member = await Member.findOne({ where: { id } })
   const userId = member.UserId
   return Order.update({ MemberId: null }, { where: { MemberId: member.id } })
+    .then(() => Order.update({ UserId: null }, { where: { UserId: userId } }))
     .then(() => member.destroy())
     .then(() => User.destroy({ where: { id: userId } }))
 }
