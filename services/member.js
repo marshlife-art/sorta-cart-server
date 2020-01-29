@@ -3,6 +3,7 @@ const models = require('../models')
 
 const Member = models.Member
 const User = models.User
+const Order = models.Order
 const Op = models.Sequelize.Op
 // using sqlite in test env so no iLike :/
 const iLike = process.env.NODE_ENV === 'test' ? Op.like : Op.iLike
@@ -50,7 +51,11 @@ const getMembers = async query => {
 }
 
 const destroyMember = async id => {
-  return await Member.destroy({ where: { id } })
+  const member = await Member.findOne({ where: { id } })
+  const userId = member.UserId
+  return Order.update({ MemberId: null }, { where: { MemberId: member.id } })
+    .then(() => member.destroy())
+    .then(() => User.destroy({ where: { id: userId } }))
 }
 
 module.exports = {
