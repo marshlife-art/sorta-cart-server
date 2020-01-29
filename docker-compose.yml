@@ -37,12 +37,13 @@ services:
       - MAILGUN_API_KEY=${MAILGUN_API_KEY}
       - MAILGUN_DOMAIN=${MAILGUN_DOMAIN}
       - MAIL_GOES_TO=hello@marshcoop.org
+      - SQUARE_TOKEN=${SQUARE_TOKEN}
+      - SQUARE_URL=${SQUARE_URL}
+      - SQUARE_LOCATION_ID=${SQUARE_LOCATION_ID}
   pg:
     image: postgres:12-alpine
     restart: always
     network_mode: bridge
-    ports:
-      - '5432:5432'
     environment:
       POSTGRES_USER: ${PG_DATABASE_USER}
       POSTGRES_PASSWORD: ${PG_DATABASE_PASSWORD}
