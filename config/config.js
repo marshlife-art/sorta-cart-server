@@ -11,7 +11,8 @@ module.exports = {
     dialectOptions: {
       ssl: {
         require: true
-      }
+      },
+      searchPath: process.env.PG_DATABASE_NAME
     },
     pool: {
       max: 20,
@@ -37,7 +38,8 @@ module.exports = {
     dialectOptions: {
       ssl: {
         require: true
-      }
+      },
+      searchPath: process.env.PG_DATABASE_NAME
     },
     pool: {
       max: 20,
