@@ -145,3 +145,23 @@ $ swapon
 NAME              TYPE       SIZE USED PRIO
 /var/vm/swapfile1 file      1024M   0B   -1
 ```
+
+#### pg database
+
+backup (to .sql file):
+
+```
+docker exec -t sorta-cart-server_pg_1 pg_dumpall -c -U marsh > dump_`date +%d-%m-%Y"_"%H_%M_%S`.sql
+```
+
+restore (from .sql file):
+
+```
+cat the_dump_file.sql | docker exec -i sorta-cart-server_pg_1 psql -U postgres
+```
+
+or restore to hosted pg database (using pg connection pool):
+
+```
+psql -U marsh -h marshcoop-do-user-6708963-0.db.ondigitalocean.com -p 25061 -d marshpool --set=sslmode=require < dump_30-01-2020_03_49_48.sql
+```

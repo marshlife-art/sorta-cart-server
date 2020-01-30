@@ -17,7 +17,15 @@ module.exports = {
     password: process.env.PG_DATABASE_PASSWORD,
     database: process.env.PG_DATABASE_NAME,
     host: process.env.PG_DATABASE_HOST,
+    port: process.env.PG_DATABASE_PORT,
     dialect: 'postgres',
-    logging: false
+    logging: false,
+    ssl: true,
+    pool: {
+      max: 20,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
   }
 }

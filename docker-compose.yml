@@ -24,8 +24,6 @@ services:
     restart: always
     volumes:
       - logvolume01:/var/log
-    links:
-      - pg
     network_mode: bridge
     environment:
       - NODE_ENV=${NODE_ENV}
@@ -33,26 +31,14 @@ services:
       - PG_DATABASE_NAME=${PG_DATABASE_NAME}
       - PG_DATABASE_USER=${PG_DATABASE_USER}
       - PG_DATABASE_PASSWORD=${PG_DATABASE_PASSWORD}
-      - PG_DATABASE_HOST=pg
+      - PG_DATABASE_HOST=${PG_DATABASE_HOST}
+      - PG_DATABASE_PORT=${PG_DATABASE_PORT}
       - MAILGUN_API_KEY=${MAILGUN_API_KEY}
       - MAILGUN_DOMAIN=${MAILGUN_DOMAIN}
       - MAIL_GOES_TO=hello@marshcoop.org
       - SQUARE_TOKEN=${SQUARE_TOKEN}
       - SQUARE_URL=${SQUARE_URL}
       - SQUARE_LOCATION_ID=${SQUARE_LOCATION_ID}
-  pg:
-    image: postgres:12-alpine
-    restart: always
-    network_mode: bridge
-    environment:
-      POSTGRES_USER: ${PG_DATABASE_USER}
-      POSTGRES_PASSWORD: ${PG_DATABASE_PASSWORD}
-      POSTGRES_DB: ${PG_DATABASE_NAME}
-      PGDATA: /pgdata
-    volumes:
-      - pgdata:/pgdata
-      - logvolume01:/var/log
 volumes:
   logvolume01: {}
-  pgdata: {}
   letsencrypt: {}
