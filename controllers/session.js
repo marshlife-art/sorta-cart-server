@@ -42,9 +42,7 @@ module.exports = function(passport) {
       try {
         user.password = password
         user.reg_key = null
-        user.save()
-
-        const auth_key = user.auth_key ? user.auth_key : user.generateAuthKey()
+        const auth_key = user.generateAuthKey()
         const payload = { id: user.id, auth_key }
         const token = jwt.sign(payload, process.env.JWT_SECRET)
         res.json({
