@@ -5,7 +5,8 @@ const {
   getOrder,
   createOrder,
   updateOrder,
-  getOrdersByIds
+  getOrdersByIds,
+  resendOrderConfirmationEmail
 } = require('../services/order')
 
 module.exports = function(passport) {
@@ -75,6 +76,22 @@ module.exports = function(passport) {
         })
         .catch(err =>
           res.status(500).send({ error: `unable to print orders err: ${err}` })
+        )
+    }
+  )
+
+  router.post(
+    '/orders/resend_email',
+    passport.authenticate('jwt', { session: false }),
+    function(req, res) {
+      resendOrderConfirmationEmail(req.body.orderId)
+        .then(result => {
+          res.json({ success: true, msg: 'ok' })
+        })
+        .catch(err =>
+          res
+            .status(500)
+            .send({ error: 'unable to resend order confirmation email!' })
         )
     }
   )

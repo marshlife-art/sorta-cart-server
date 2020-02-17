@@ -1,7 +1,12 @@
 const router = require('express').Router()
 
-const { createOrder, validateLineItems } = require('../services/order')
+const {
+  createOrder,
+  validateLineItems,
+  getMyOrders
+} = require('../services/order')
 const { createPayment } = require('../services/square_payments')
+const { sendOrderConfirmationEmail } = require('../mailers/order_mailer')
 
 module.exports = function(passport) {
   router.post('/store/checkout', async function(req, res) {
@@ -26,7 +31,8 @@ module.exports = function(passport) {
       res.send({ error: 'payment error' })
       console.warn(
         '[store/checkout] onoz! caught error in createPayment error:',
-        error
+        e.response.text,
+        JSON.stringify(e)
       )
       return
     }
@@ -45,6 +51,10 @@ module.exports = function(passport) {
         }
       ]
     })
+      .then(order => {
+        sendOrderConfirmationEmail(order).catch(console.warn)
+        return order
+      })
       .then(order => res.json({ success: true, msg: 'ok', order: order }))
       .catch(err =>
         res
@@ -62,6 +72,22 @@ module.exports = function(passport) {
           .json({ error: true, msg: `unable to validate order err: ${err}` })
       )
   })
+
+  router.post(
+    '/myorders',
+    passport.authenticate('jwt', { session: false }),
+    function(req, res) {
+      console.log('req.user.id:', req.user.id)
+
+      getMyOrders(req.user.id)
+        .then(orders => res.json({ orders: orders || [] }))
+        .catch(err =>
+          res
+            .status(500)
+            .json({ error: true, msg: `onoz! unable to get my orders` })
+        )
+    }
+  )
 
   return router
 }

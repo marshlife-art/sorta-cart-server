@@ -1,5 +1,6 @@
 const findParamsFor = require('../util/findParamsFor')
 const models = require('../models')
+const { sendOrderConfirmationEmail } = require('../mailers/order_mailer')
 
 const Order = models.Order
 const OrderLineItem = models.OrderLineItem
@@ -96,6 +97,15 @@ const getOrdersByIds = async orderIds => {
   })
 }
 
+const getMyOrders = async UserId => {
+  return await Order.findAll({
+    where: {
+      UserId
+    },
+    include: [OrderLineItem, User, Member]
+  })
+}
+
 const validateLineItems = async lineItems => {
   // console.log('validateLineItems lineItems:', lineItems)
   // #TOOOOOODOOOOOO :/
@@ -158,11 +168,19 @@ const validateLineItems = async lineItems => {
   })
 }
 
+const resendOrderConfirmationEmail = async orderId => {
+  return await getOrder(orderId).then(order =>
+    sendOrderConfirmationEmail(order)
+  )
+}
+
 module.exports = {
   getOrders,
   getOrder,
   createOrder,
   updateOrder,
   getOrdersByIds,
-  validateLineItems
+  validateLineItems,
+  getMyOrders,
+  resendOrderConfirmationEmail
 }
