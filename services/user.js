@@ -26,6 +26,15 @@ const getUser = async obj => {
   })
 }
 
+const getUserByEmail = async email => {
+  return await User.findOne({
+    where: models.Sequelize.where(
+      models.Sequelize.fn('lower', models.Sequelize.col('email')),
+      models.Sequelize.fn('lower', email)
+    )
+  })
+}
+
 const getUsers = async query => {
   let findParams = findParamsFor(query)
 
@@ -68,12 +77,18 @@ const registerMember = async (email, password) => {
 }
 
 const isEmailAvailable = async email => {
-  return User.count({ where: { email } }).then(count => count === 0)
+  return User.count({
+    where: models.Sequelize.where(
+      models.Sequelize.fn('lower', models.Sequelize.col('email')),
+      models.Sequelize.fn('lower', email)
+    )
+  }).then(count => count === 0)
 }
 
 module.exports = {
   createUser,
   getUser,
+  getUserByEmail,
   getUsers,
   destroyUser,
   registerMember,

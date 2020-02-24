@@ -4,6 +4,7 @@ const { createPayment } = require('../services/square_payments')
 
 const {
   getUser,
+  getUserByEmail,
   confirmUser,
   registerMember,
   isEmailAvailable
@@ -14,7 +15,7 @@ const { sendPasswordResetEmail } = require('../mailers/user_mailer')
 module.exports = function(passport) {
   router.post('/forgotpassword', async function(req, res) {
     const { email } = req.body
-    const user = await getUser({ email })
+    const user = await getUserByEmail(email)
     if (user) {
       if (!user.reg_key) {
         user.generateRegKey()
@@ -162,7 +163,7 @@ module.exports = function(passport) {
   router.post('/login', async function(req, res, next) {
     const { email, password } = req.body
     if (email && password) {
-      const user = await getUser({ email: email })
+      const user = await getUserByEmail(email)
       if (user && user.validPassword(password)) {
         const auth_key = user.auth_key ? user.auth_key : user.generateAuthKey()
         const payload = { id: user.id, auth_key }

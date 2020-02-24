@@ -2,8 +2,10 @@ const assert = require('assert')
 const {
   getUsers,
   getUser,
+  getUserByEmail,
   createUser,
-  destroyUser
+  destroyUser,
+  isEmailAvailable
 } = require('../../services/user')
 const { createFakeUsers } = require('../fixtures/users')
 
@@ -79,6 +81,26 @@ describe('services', function() {
     it('should get a user by id', async function() {
       const user = await getUser({ id: 1 })
       assert.equal(user.id, 1)
+    })
+
+    it('get user by email', async function() {
+      const user = await getUserByEmail('admin@marshcoop.org')
+      assert.equal(user.email, 'admin@marshcoop.org')
+    })
+
+    it('should handle case insensitive email', async function() {
+      const user = await getUserByEmail('GUEST@marshcoop.org')
+      assert.equal(user.email, 'guest@marshcoop.org')
+    })
+
+    it('should be able to confirm is email is available', async function() {
+      const available = await isEmailAvailable('guest@marshcoop.org')
+      assert.equal(available, false)
+    })
+
+    it('should be able to confirm is email is available. regardless of case', async function() {
+      const available = await isEmailAvailable('GUEST@marshcoop.org')
+      assert.equal(available, false)
     })
   })
 
