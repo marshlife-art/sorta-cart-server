@@ -1,4 +1,3 @@
-const { Parser } = require('json2csv')
 const router = require('express').Router()
 
 const {
@@ -144,42 +143,6 @@ module.exports = function(passport) {
             msg: `o noz! unable to remove line items ${err}`
           })
         )
-    }
-  )
-
-  router.post(
-    '/whosaleorder/exportcsv',
-    passport.authenticate('jwt', { session: false }),
-    function(req, res) {
-      const { lineItemData } = req.body
-      // res.setHeader('Content-disposition', `attachment; filename=${vendor}.csv`)
-      res.set('Content-Type', 'text/csv')
-      res.status(200)
-      const json2csvParser = new Parser({
-        fields: [
-          'product.unf',
-          'product.upc_code',
-          'vendor',
-          'description',
-          'qtySum',
-          'totalSum',
-          'product.ws_price_cost',
-          'product.u_price_cost',
-          'product.pk',
-          'product.size',
-          'product.unit_type',
-          'product.category',
-          'product.sub_category',
-          'product.name',
-          'product.description'
-        ]
-      })
-      const csvout = json2csvParser.parse(
-        Object.values(lineItemData.groupedLineItems)
-      )
-      res.flushHeaders()
-      res.write(csvout)
-      res.end()
     }
   )
 
