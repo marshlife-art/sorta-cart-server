@@ -115,7 +115,11 @@
           <b>shipment</b>
         </td>
         <td>{{this.shipment_status}}</td>
-        <td align="right" colspan="4" class="left-border bottom-border gray-bg header">marshcoop.org</td>
+        <td align="right" colspan="4" class="left-border bottom-border gray-bg header">
+          marshcoop.org <br>
+          <a href="https://marshlife-art.org/marsh-food-cooperative-schedule/" target="_blank"
+            rel="noopener noreferrer">Order Delivery Schedule</a>
+        </td>
       </tr>
 
       {{#if this.User}}
@@ -131,12 +135,6 @@
         <td colspan="6">
           <b>created at</b>
           <span class="date">{{this.createdAt}}</span>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="6">
-          <b>updated at</b>
-          <span class=" date">{{this.updatedAt}}</span>
         </td>
       </tr>
 
