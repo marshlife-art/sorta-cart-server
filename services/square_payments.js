@@ -20,7 +20,7 @@ async function createPayment(nonce, amountCents, note) {
   const request_body = {
     source_id: nonce,
     amount_money: {
-      amount: amountCents,
+      amount: parseInt(amountCents),
       currency: 'USD'
     },
     note: note,
