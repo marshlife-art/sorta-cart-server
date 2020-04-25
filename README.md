@@ -41,7 +41,7 @@ create an admin user from the command line:
 
 `npm run create:admin -- hello@marshcoop.org zomgzomg`
 
-### DATABASE (PostgreSQL)
+### DATABASE
 
 #### run migrations
 
@@ -65,13 +65,42 @@ undo specific seed:
 
 `npm run db:migrate:undo:all && npm run db:migrate && npm run db:seed:all`
 
+### docker notes
+
+see [3dwardsharp/sorta-cart-server](https://hub.docker.com/r/3dwardsharp/sorta-cart-server) on dockerhub.
+
+```
+docker build -t 3dwardsharp/sorta-cart-server .
+docker run -p 3000:3000 --env-file=.env 3dwardsharp/sorta-cart-server
+```
+
+_note:_ use whatever tag makes sense (i.e. something other than `3dwardsharp/sorta-cart-server`)
+
+#### PostgreSQL (pg) database
+
+##### local docker pg
+
+backup (to .sql file):
+
+```
+docker exec -t sorta-cart-server_pg_1 pg_dumpall -c -U marsh > dump_`date +%d-%m-%Y"_"%H_%M_%S`.sql
+```
+
+restore (from .sql file):
+
+```
+cat the_dump_file.sql | docker exec -i sorta-cart-server_pg_1 psql -U postgres
+```
+
+##### digitalocean hosted pg database (using pg connection pool):
+
+```
+psql -U $PG_DATABASE_USER -h $PG_DATABASE_HOST -p $PG_DATABASE_PORT -d $PG_DATABASE_NAME --set=sslmode=require < dump_30-01-2020_03_49_48.sql
+```
+
 ### MISC
 
-getting started:
-
-`npm i -S body-parser express jsonwebtoken passport passport-jwt sequelize pg pg-hstore dotenv multer -D sequelize-cli`
-
-#### sequelize setup
+#### sequelize CLI
 
 generate some models:  
 `npx sequelize-cli model:generate --name User --attributes name:string,email:string`
@@ -87,38 +116,3 @@ generate some models:
 `npx sequelize-cli model:generate --name Page --attributes href:string,content:text`
 
 `npx sequelize-cli model:generate --name Member --attributes name:string,phone:string,address:string,discount:number,fees_paid:number,store_credit:number,shares:number,member_type:string`
-
-### docker notes
-
-see [3dwardsharp/sorta-cart-server](https://hub.docker.com/r/3dwardsharp/sorta-cart-server) on dockerhub.
-
-```
-docker build -t 3dwardsharp/sorta-cart-server .
-docker run -p 3000:3000 --env-file=.env 3dwardsharp/sorta-cart-server
-```
-
-#### pg database
-
-backup (to .sql file):
-
-```
-docker exec -t sorta-cart-server_pg_1 pg_dumpall -c -U marsh > dump_`date +%d-%m-%Y"_"%H_%M_%S`.sql
-```
-
-restore (from .sql file):
-
-```
-cat the_dump_file.sql | docker exec -i sorta-cart-server_pg_1 psql -U postgres
-```
-
-or restore to hosted pg database (using pg connection pool):
-
-```
-psql -U marsh -h marshcoop-do-user-6708963-0.db.ondigitalocean.com -p 25061 -d marshpool --set=sslmode=require < dump_30-01-2020_03_49_48.sql
-```
-
-#### other docker notes
-
-memory limits:
-
-`-m "300M" --memory-swap "1G"`
