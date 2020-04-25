@@ -1,9 +1,14 @@
-FROM node:lts-alpine
+FROM node:12-alpine
 
-WORKDIR /usr/src/app
+#bcrypt help
+RUN apk --no-cache add --virtual builds-deps build-base python
+
+WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-COPY . .
+COPY . /app
+
 EXPOSE 3000
-CMD [ "npm", "start" ]
+USER node   
+CMD ["node", "server.js"] 
