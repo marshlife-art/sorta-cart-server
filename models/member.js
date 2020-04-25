@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {}
   )
-  Member.associate = function(models) {
+  Member.associate = function (models) {
     // member will carry the UserId column
     Member.belongsTo(models.User)
   }

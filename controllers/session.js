@@ -12,8 +12,8 @@ const {
 const { createMember } = require('../services/member')
 const { sendPasswordResetEmail } = require('../mailers/user_mailer')
 
-module.exports = function(passport) {
-  router.post('/forgotpassword', async function(req, res) {
+module.exports = function (passport) {
+  router.post('/forgotpassword', async function (req, res) {
     const { email } = req.body
     const user = await getUserByEmail(email)
     if (user) {
@@ -35,7 +35,7 @@ module.exports = function(passport) {
     return
   })
 
-  router.post('/resetpassword', async function(req, res) {
+  router.post('/resetpassword', async function (req, res) {
     const { regKey, password } = req.body
 
     if (regKey && regKey.length && password) {
@@ -66,12 +66,12 @@ module.exports = function(passport) {
     return
   })
 
-  router.post('/register/check', async function(req, res) {
+  router.post('/register/check', async function (req, res) {
     const { email } = req.body
     res.send({ valid: await isEmailAvailable(email) })
   })
 
-  router.post('/register', async function(req, res) {
+  router.post('/register', async function (req, res) {
     try {
       const { user, member, nonce } = req.body
       if (
@@ -133,13 +133,13 @@ module.exports = function(passport) {
     }
   })
 
-  router.post('/confirm', function(req, res, next) {
+  router.post('/confirm', function (req, res, next) {
     const { regKey } = req.body
     if (!regKey) {
       res.json({ error: true, msg: 'no registration key' })
     } else {
       confirmUser(regKey)
-        .then(user => {
+        .then((user) => {
           // go ahead a auth user
           const auth_key = user.auth_key
             ? user.auth_key
@@ -156,11 +156,11 @@ module.exports = function(passport) {
             }
           })
         })
-        .catch(err => res.json({ error: true, msg: err }))
+        .catch((err) => res.json({ error: true, msg: err }))
     }
   })
 
-  router.post('/login', async function(req, res, next) {
+  router.post('/login', async function (req, res, next) {
     const { email, password } = req.body
     if (email && password) {
       const user = await getUserByEmail(email)
@@ -188,7 +188,7 @@ module.exports = function(passport) {
   router.delete(
     '/logout',
     passport.authenticate('jwt', { session: false }),
-    async function(req, res) {
+    async function (req, res) {
       const reqUser = await req.user
       if (reqUser && reqUser.dataValues && reqUser.dataValues.auth_key) {
         const user = await getUser({ auth_key: reqUser.dataValues.auth_key })
@@ -205,7 +205,7 @@ module.exports = function(passport) {
   router.get(
     '/check_session',
     passport.authenticate('jwt', { session: false }),
-    async function(req, res) {
+    async function (req, res) {
       const reqUser = await req.user
       if (reqUser && reqUser.dataValues && reqUser.dataValues.id) {
         const user = reqUser.dataValues

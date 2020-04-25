@@ -56,7 +56,7 @@ module.exports = (csv_path, import_tag, vendor, markup) => {
   vendor = vendor || 'default'
   markup = markup || 0.0
 
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     const results = []
     const errors = []
     let cat = ''
@@ -78,7 +78,7 @@ module.exports = (csv_path, import_tag, vendor, markup) => {
           mapValues: ({ header, index, value }) => value.trim()
         })
       )
-      .on('data', data => {
+      .on('data', (data) => {
         try {
           if (
             data['upc_code'] === '' &&
@@ -94,7 +94,7 @@ module.exports = (csv_path, import_tag, vendor, markup) => {
             // aggregate codes cols into single col
             let codes = []
 
-            CODE_COLZ.forEach(code => {
+            CODE_COLZ.forEach((code) => {
               if (data[code]) {
                 codes.push(data[code])
               }
@@ -102,7 +102,7 @@ module.exports = (csv_path, import_tag, vendor, markup) => {
             })
             if (data['codes']) {
               data['codes'] = [
-                ...data['codes'].split(',').map(s => s.trim()),
+                ...data['codes'].split(',').map((s) => s.trim()),
                 ...codes
               ].join(', ')
             } else {

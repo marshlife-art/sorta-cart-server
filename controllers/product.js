@@ -15,14 +15,14 @@ const {
 
 const upload = multer({
   storage: multer.diskStorage({
-    destination: function(req, file, cb) {
+    destination: function (req, file, cb) {
       cb(null, '/tmp')
     },
-    filename: function(req, file, cb) {
+    filename: function (req, file, cb) {
       cb(null, Date.now() + '_' + file.originalname)
     }
   }),
-  fileFilter: function(req, file, cb) {
+  fileFilter: function (req, file, cb) {
     const filetypes = /csv/
     // const mimetype = filetypes.test(file.mimetype)
     const extname = filetypes.test(
@@ -37,9 +37,9 @@ const upload = multer({
   }
 })
 
-module.exports = function(passport) {
-  router.post('/products', function(req, res) {
-    getProducts(req.body).then(result =>
+module.exports = function (passport) {
+  router.post('/products', function (req, res) {
+    getProducts(req.body).then((result) =>
       res.json({
         data: result.rows,
         page: req.body && req.body.page ? req.body.page : 0,
@@ -48,11 +48,11 @@ module.exports = function(passport) {
     )
   })
 
-  router.get('/categories', function(req, res) {
-    return getCategories().then(result =>
+  router.get('/categories', function (req, res) {
+    return getCategories().then((result) =>
       res.json(
         result
-          .map(r => r['DISTINCT'])
+          .map((r) => r['DISTINCT'])
           .reduce((acc, cur) => {
             acc[cur] = cur
             return acc
@@ -61,11 +61,11 @@ module.exports = function(passport) {
     )
   })
 
-  router.get('/sub_categories', function(req, res) {
-    return getSubCategories().then(result =>
+  router.get('/sub_categories', function (req, res) {
+    return getSubCategories().then((result) =>
       res.json(
         result
-          .map(r => r['DISTINCT'])
+          .map((r) => r['DISTINCT'])
           .reduce((acc, cur) => {
             acc[cur] = cur
             return acc
@@ -74,11 +74,11 @@ module.exports = function(passport) {
     )
   })
 
-  router.post('/sub_categories', function(req, res) {
-    return getSubCategories(req.body).then(result =>
+  router.post('/sub_categories', function (req, res) {
+    return getSubCategories(req.body).then((result) =>
       res.json(
         result
-          .map(r => r['DISTINCT'])
+          .map((r) => r['DISTINCT'])
           .reduce((acc, cur) => {
             acc[cur] = cur
             return acc
@@ -90,11 +90,11 @@ module.exports = function(passport) {
   router.post(
     '/products/destroy',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
+    function (req, res) {
       const { ids } = req.body
       return destroyProducts(ids)
         .then(() => res.json({ msg: 'products destroyed!' }))
-        .catch(err =>
+        .catch((err) =>
           res.status(500).json({
             error: true,
             msg: `o noz! unable to destroy products ${err}`
@@ -103,11 +103,11 @@ module.exports = function(passport) {
     }
   )
 
-  router.get('/products/vendors', function(req, res) {
-    return getProductVendors().then(result =>
+  router.get('/products/vendors', function (req, res) {
+    return getProductVendors().then((result) =>
       res.json(
         result
-          .map(r => r['DISTINCT'])
+          .map((r) => r['DISTINCT'])
           .reduce((acc, cur) => {
             acc[cur] = cur
             return acc
@@ -116,11 +116,11 @@ module.exports = function(passport) {
     )
   })
 
-  router.get('/products/import_tags', function(req, res) {
-    return getProductImportTags().then(result =>
+  router.get('/products/import_tags', function (req, res) {
+    return getProductImportTags().then((result) =>
       res.json(
         result
-          .map(r => r['DISTINCT'])
+          .map((r) => r['DISTINCT'])
           .reduce((acc, cur) => {
             acc[cur] = cur
             return acc
@@ -133,7 +133,7 @@ module.exports = function(passport) {
     '/products/upload',
     passport.authenticate('jwt', { session: false }),
     upload.single('file'),
-    function(req, res, next) {
+    function (req, res, next) {
       if (req.fileValidationError) {
         res.send({ error: req.fileValidationError })
       } else {
@@ -152,8 +152,8 @@ module.exports = function(passport) {
             prev_import_tag,
             markup
           )
-            .then(response => res.json({ msg: response }))
-            .catch(err =>
+            .then((response) => res.json({ msg: response }))
+            .catch((err) =>
               res.status(500).json({
                 error: true,
                 msg: `Unable to import products! ${err}`

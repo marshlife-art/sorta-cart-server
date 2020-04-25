@@ -2,7 +2,7 @@ const Op = require('sequelize').Op
 // using sqlite in test env so no iLike :/
 const iLike = process.env.NODE_ENV === 'test' ? Op.like : Op.iLike
 
-const findParamsFor = query => {
+const findParamsFor = (query) => {
   const limit = query.pageSize || 50
   const page = query.page || 0
   const orderBy = (query.orderBy && query.orderBy.field) || 'id'
@@ -19,7 +19,7 @@ const findParamsFor = query => {
 
   if (query.filters && query.filters.length) {
     // map all filters into a buncha WHEREz
-    query.filters.forEach(filter => {
+    query.filters.forEach((filter) => {
       if (
         filter.column &&
         filter.column.field &&
@@ -30,7 +30,7 @@ const findParamsFor = query => {
         if (filter.column.field === 'codes') {
           filters = {
             codes: {
-              [Op.or]: filter.value.map(val => ({ [iLike]: `%${val}%` }))
+              [Op.or]: filter.value.map((val) => ({ [iLike]: `%${val}%` }))
             }
           }
         } else if (Array.isArray(filter.value)) {

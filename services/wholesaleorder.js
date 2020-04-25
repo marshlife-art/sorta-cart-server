@@ -8,7 +8,7 @@ const Op = models.Sequelize.Op
 // using sqlite in test env so no iLike :/
 const iLike = process.env.NODE_ENV === 'test' ? Op.like : Op.iLike
 
-const getWholesaleOrders = async query => {
+const getWholesaleOrders = async (query) => {
   const status = query.status || ['new', 'needs_review', 'pending']
 
   const limit = query.pageSize || 50
@@ -25,7 +25,7 @@ const getWholesaleOrders = async query => {
   return await WholesaleOrder.findAndCountAll(findParams)
 }
 
-const getLineItems = async query => {
+const getLineItems = async (query) => {
   let findParams = findParamsFor(query)
 
   const q = query.search || ''
@@ -43,14 +43,14 @@ const getLineItems = async query => {
   return await OrderLineItem.findAndCountAll(findParams)
 }
 
-const getWholesaleOrder = async id => {
+const getWholesaleOrder = async (id) => {
   return await WholesaleOrder.findOne({
     where: { id },
     include: [OrderLineItem]
   })
 }
 
-const createWholesaleOrder = async wholesaleorder => {
+const createWholesaleOrder = async (wholesaleorder) => {
   delete wholesaleorder.id
   delete wholesaleorder.createdAt
   delete wholesaleorder.updatedAt
@@ -59,7 +59,7 @@ const createWholesaleOrder = async wholesaleorder => {
   })
 }
 
-const upsertWholesaleOrder = async wholesaleorder => {
+const upsertWholesaleOrder = async (wholesaleorder) => {
   delete wholesaleorder.createdAt
   delete wholesaleorder.updatedAt
   return await WholesaleOrder.upsert(wholesaleorder, {
@@ -74,7 +74,7 @@ const addLineItems = async ({ id, selectedLineItems }) => {
     WholesaleOrderId = await WholesaleOrder.create({
       vendor: 'New WholesaleOrder',
       status: 'new'
-    }).then(order => order.id)
+    }).then((order) => order.id)
   }
 
   return await OrderLineItem.update(

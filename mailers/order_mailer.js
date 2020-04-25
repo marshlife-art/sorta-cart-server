@@ -10,7 +10,7 @@ const mailgun = require('mailgun-js')({
 })
 
 const Handlebars = require('handlebars')
-Handlebars.registerHelper('each_when', function(list, k, v, opts) {
+Handlebars.registerHelper('each_when', function (list, k, v, opts) {
   let i,
     result = ''
   for (i = 0; i < list.length; ++i)
@@ -22,8 +22,8 @@ const fs = require('fs')
 const source = fs.readFileSync('views/orders.handlebars', 'utf8')
 const template = Handlebars.compile(source)
 
-const sendOrderConfirmationEmail = order => {
-  return new Promise(function(resolve, reject) {
+const sendOrderConfirmationEmail = (order) => {
+  return new Promise(function (resolve, reject) {
     if (process.env.NODE_ENV === 'test') {
       // fuhgeddaboudit!
       resolve()
@@ -39,7 +39,7 @@ const sendOrderConfirmationEmail = order => {
           // text: 'order receipt'
           html: template({ orders: [order] })
         },
-        function(error, body) {
+        function (error, body) {
           // error && console.warn(body)
           error ? reject(error) : resolve()
         }

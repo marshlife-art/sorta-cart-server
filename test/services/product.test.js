@@ -11,19 +11,19 @@ const materialTableFilterExample = require('../fixtures/materialTableFilterExamp
 
 const FAKE_PRODUCT_COUNT = 10
 
-describe('services', function() {
-  describe('product', function() {
-    before(async function() {
+describe('services', function () {
+  describe('product', function () {
+    before(async function () {
       return createFakeProducts(true, FAKE_PRODUCT_COUNT)
     })
 
-    it('should get products without params', async function() {
+    it('should get products without params', async function () {
       const products = await getProducts({})
       assert.equal(products.count, FAKE_PRODUCT_COUNT)
       assert.equal(products.rows.length, FAKE_PRODUCT_COUNT)
     })
 
-    it('should accept a search query', async function() {
+    it('should accept a search query', async function () {
       const products = await getProducts({
         search: '1fake name'
       })
@@ -31,7 +31,7 @@ describe('services', function() {
       assert.equal(products.rows.length, 1)
     })
 
-    it('should filter by product codes', async function() {
+    it('should filter by product codes', async function () {
       const products = await getProducts({
         filters: [
           {
@@ -63,7 +63,7 @@ describe('services', function() {
       assert.equal(c_product.rows.length, 1)
     })
 
-    it('can hang with empty filterz', async function() {
+    it('can hang with empty filterz', async function () {
       const products = await getProducts({
         filters: [{}]
       })
@@ -71,27 +71,27 @@ describe('services', function() {
       assert.equal(products.rows.length, FAKE_PRODUCT_COUNT)
     })
 
-    it('should accept material-table filter query', async function() {
+    it('should accept material-table filter query', async function () {
       const products = await getProducts(materialTableFilterExample)
       assert.equal(products.count, 0)
       assert.equal(products.rows.length, 0)
     })
 
-    it('should get a distinct list of categories', async function() {
+    it('should get a distinct list of categories', async function () {
       const catz = await getCategories()
       assert.equal(catz.length, 3)
     })
 
-    it('should get a distinct list of sub categories', async function() {
+    it('should get a distinct list of sub categories', async function () {
       const subcatz = await getSubCategories()
       assert.equal(subcatz.length, 5)
     })
 
-    it('should destroy products', async function() {
+    it('should destroy products', async function () {
       const products = await getProducts({
         pageSize: 5
       })
-      const ids = products.rows.map(p => p.id)
+      const ids = products.rows.map((p) => p.id)
       assert.equal(ids.length, 5)
 
       await destroyProducts(ids)

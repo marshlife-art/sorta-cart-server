@@ -17,13 +17,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       hooks: {
-        beforeCreate: user => {
+        beforeCreate: (user) => {
           if (user.password) {
             user.password = bcrypt.hashSync(user.password, 10)
           }
           user.generateRegKey()
         },
-        beforeUpdate: user => {
+        beforeUpdate: (user) => {
           if (user.password && user.changed('password')) {
             user.password = bcrypt.hashSync(user.password, 10)
           }
@@ -32,29 +32,29 @@ module.exports = (sequelize, DataTypes) => {
     }
   )
 
-  User.prototype.validPassword = function(password) {
+  User.prototype.validPassword = function (password) {
     return bcrypt.compareSync(password, this.password)
   }
 
-  User.prototype.generateRegKey = function() {
+  User.prototype.generateRegKey = function () {
     const reg_key = crypto.randomBytes(32).toString('hex')
     this.setDataValue('reg_key', reg_key)
     return reg_key
   }
 
-  User.prototype.generateAuthKey = function() {
+  User.prototype.generateAuthKey = function () {
     const auth_key = crypto.randomBytes(32).toString('hex')
     this.setDataValue('auth_key', auth_key)
     this.save()
     return auth_key
   }
 
-  User.prototype.logout = function() {
+  User.prototype.logout = function () {
     this.setDataValue('auth_key', null)
     this.save()
   }
 
-  User.associate = function(models) {
+  User.associate = function (models) {
     User.hasMany(models.Order)
     User.hasOne(models.Member)
   }

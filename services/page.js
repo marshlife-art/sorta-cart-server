@@ -2,7 +2,7 @@ const models = require('../models')
 
 const Page = models.Page
 
-const getPage = async slug => {
+const getPage = async (slug) => {
   return await Page.findOne({ where: { slug: slug } })
 }
 

@@ -11,7 +11,7 @@ if (process.argv[2] && process.argv[3]) {
       console.log(`created admin ${process.argv[2]}`)
       process.exit()
     })
-    .catch(err => {
+    .catch((err) => {
       console.warn(`ERROR! ${err}`)
       process.exit()
     })

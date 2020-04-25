@@ -10,7 +10,7 @@ const mailgun = require('mailgun-js')({
 })
 
 const sendConfirmationEmail = (email, regKey) => {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (process.env.NODE_ENV === 'test') {
       // fuhgeddaboudit!
       resolve()
@@ -22,7 +22,7 @@ const sendConfirmationEmail = (email, regKey) => {
           subject: 'Confirm your email',
           text: `Use this link to confirm your email: https://marshcoop.org/confirm?regKey=${regKey}`
         },
-        function(error, body) {
+        function (error, body) {
           console.log(body)
           error ? reject(error) : resolve()
         }
@@ -34,7 +34,7 @@ const sendConfirmationEmail = (email, regKey) => {
 }
 
 const sendAdminRegistrationEmail = (email, regKey) => {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (process.env.NODE_ENV === 'test') {
       // fuhgeddaboudit!
       resolve()
@@ -46,7 +46,7 @@ const sendAdminRegistrationEmail = (email, regKey) => {
           subject: 'Confirm your email',
           text: `Use this link to confirm your email and complete the registration process. https://admin.marshcoop.org/confirm?regKey=${regKey}`
         },
-        function(error, body) {
+        function (error, body) {
           console.log(body)
           error ? reject(error) : resolve()
         }
@@ -58,7 +58,7 @@ const sendAdminRegistrationEmail = (email, regKey) => {
 }
 
 const sendPasswordResetEmail = (email, regKey) => {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (process.env.NODE_ENV === 'test') {
       // fuhgeddaboudit!
       resolve()
@@ -70,7 +70,7 @@ const sendPasswordResetEmail = (email, regKey) => {
           subject: 'Reset password',
           text: `Use this link to reset your password: https://marshcoop.org/resetpassword?regKey=${regKey}`
         },
-        function(error, body) {
+        function (error, body) {
           console.log(body)
           error ? reject(error) : resolve()
         }

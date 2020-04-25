@@ -8,7 +8,7 @@ const Op = models.Sequelize.Op
 // using sqlite in test env so no iLike :/
 const iLike = process.env.NODE_ENV === 'test' ? Op.like : Op.iLike
 
-const createMember = async member => {
+const createMember = async (member) => {
   if (!member) {
     return
   }
@@ -19,21 +19,21 @@ const createMember = async member => {
   })
 }
 
-const upsertMember = async member => {
+const upsertMember = async (member) => {
   if (!member) {
     return
   }
   return await Member.upsert(member)
 }
 
-const getMember = async member => {
+const getMember = async (member) => {
   return await Member.findOne({
     where: member,
     include: [User]
   })
 }
 
-const getMembers = async query => {
+const getMembers = async (query) => {
   let findParams = findParamsFor(query)
 
   const q = query.search || ''
@@ -50,7 +50,7 @@ const getMembers = async query => {
   return await Member.findAndCountAll(findParams)
 }
 
-const destroyMember = async id => {
+const destroyMember = async (id) => {
   const member = await Member.findOne({ where: { id } })
   const userId = member.UserId
   return Order.update({ MemberId: null }, { where: { MemberId: member.id } })

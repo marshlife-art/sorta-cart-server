@@ -9,24 +9,24 @@ const {
   createWholesaleOrderFixture
 } = require('../fixtures/wholesaleorders')
 
-describe('services', function() {
-  describe('wholesale orders', function() {
-    before(async function() {
+describe('services', function () {
+  describe('wholesale orders', function () {
+    before(async function () {
       return createWholesaleOrderFixture(true)
     })
 
-    it('should get wholesale orders with status param', async function() {
+    it('should get wholesale orders with status param', async function () {
       const wholesaleorders = await getWholesaleOrders({ status: 'new' })
       assert.equal(wholesaleorders.count, 1)
       assert.equal(wholesaleorders.rows.length, 1)
     })
 
-    it('should get wholesale order', async function() {
+    it('should get wholesale order', async function () {
       const wholesaleorder = await getWholesaleOrder(1)
       assert.equal(wholesaleorder.notes, 'testing wholesale order')
     })
 
-    it('should be able to create wholesale orders', async function() {
+    it('should be able to create wholesale orders', async function () {
       let wholesaleorder = WHOLESALE_ORDER
       wholesaleorder.vendor = 'SOME VENDOR'
       const newWholesaleOrder = await createWholesaleOrder(wholesaleorder)

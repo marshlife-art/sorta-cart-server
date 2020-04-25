@@ -12,7 +12,7 @@ const jwtOptions = {
   jwtFromRequest: passportJWT.ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET
 }
-const strategy = new passportJWT.Strategy(jwtOptions, async function(
+const strategy = new passportJWT.Strategy(jwtOptions, async function (
   jwt_payload,
   next
 ) {
@@ -52,7 +52,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 // handlebarz
 const hbs = exphbs.create({
   helpers: {
-    each_when: function(list, k, v, opts) {
+    each_when: function (list, k, v, opts) {
       let i,
         result = ''
       for (i = 0; i < list.length; ++i)
@@ -68,12 +68,12 @@ app.set('view engine', 'handlebars')
 app.use('/', require('./controllers')(passport))
 
 // since this is the last route def, if nothing matched before it, it's a 404
-app.use(function(req, res) {
+app.use(function (req, res) {
   res.status(404)
   res.send({ error: 'not found' })
 })
 
 const port = process.env.PORT || 3000
-app.listen(port, function() {
+app.listen(port, function () {
   console.log(`sorta-cart-server is running on port ${port}`)
 })

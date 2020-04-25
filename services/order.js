@@ -11,7 +11,7 @@ const Op = models.Sequelize.Op
 // using sqlite in test env so no iLike :/
 const iLike = process.env.NODE_ENV === 'test' ? Op.like : Op.iLike
 
-const getOrders = async query => {
+const getOrders = async (query) => {
   let findParams = findParamsFor(query)
 
   const q = query.search || ''
@@ -32,23 +32,23 @@ const getOrders = async query => {
   return await Order.findAndCountAll(findParams)
 }
 
-const getOrder = async id => {
+const getOrder = async (id) => {
   return await Order.findOne({
     where: { id },
     include: [OrderLineItem, User, Member]
   })
 }
 
-const createOrder = async order => {
+const createOrder = async (order) => {
   delete order.id
   delete order.createdAt
   delete order.updatedAt
-  order.OrderLineItems.map(oli => delete oli.id)
+  order.OrderLineItems.map((oli) => delete oli.id)
 
   return await Order.create(order, { include: [OrderLineItem] })
 }
 
-const updateOrder = async order => {
+const updateOrder = async (order) => {
   delete order.createdAt
   delete order.updatedAt
 
@@ -64,7 +64,7 @@ const updateOrder = async order => {
   // to avoid orphaned order line items from collecting in the db
   // first destroy all the line items for this order `o`, then re-created
   // with all the line items being submitted `order`.
-  const line_items = o.OrderLineItems.map(oli => oli.id)
+  const line_items = o.OrderLineItems.map((oli) => oli.id)
 
   if (line_items && line_items.length) {
     await OrderLineItem.destroy({
@@ -78,7 +78,7 @@ const updateOrder = async order => {
 
   await o.setOrderLineItems([])
 
-  order.OrderLineItems.forEach(async li => {
+  order.OrderLineItems.forEach(async (li) => {
     const newoli = await OrderLineItem.create(li)
     await o.addOrderLineItem(newoli)
   })
@@ -86,7 +86,7 @@ const updateOrder = async order => {
   return o
 }
 
-const getOrdersByIds = async orderIds => {
+const getOrdersByIds = async (orderIds) => {
   return await Order.findAll({
     where: {
       id: {
@@ -115,11 +115,11 @@ const getMyOrders = async (UserId) => {
   })
 }
 
-const validateLineItems = async lineItems => {
+const validateLineItems = async (lineItems) => {
   // console.log('validateLineItems lineItems:', lineItems)
   // #TOOOOOODOOOOOO :/
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     // let invalidLineItems = []
     // lineItems.forEach(async li => {
     //   if (
@@ -177,8 +177,8 @@ const validateLineItems = async lineItems => {
   })
 }
 
-const resendOrderConfirmationEmail = async orderId => {
-  return await getOrder(orderId).then(order =>
+const resendOrderConfirmationEmail = async (orderId) => {
+  return await getOrder(orderId).then((order) =>
     sendOrderConfirmationEmail(order)
   )
 }

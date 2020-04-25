@@ -1,0 +1,5 @@
+node_modules/
+*.csv
+coverage/
+doc/
+.nyc_output/

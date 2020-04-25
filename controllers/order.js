@@ -9,12 +9,12 @@ const {
   resendOrderConfirmationEmail
 } = require('../services/order')
 
-module.exports = function(passport) {
+module.exports = function (passport) {
   router.post(
     '/orders',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
-      getOrders(req.body).then(result =>
+    function (req, res) {
+      getOrders(req.body).then((result) =>
         res.json({
           data: result.rows,
           page: req.body && req.body.page ? req.body.page : 0,
@@ -27,11 +27,11 @@ module.exports = function(passport) {
   router.get(
     '/order/edit/:id',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
+    function (req, res) {
       const id = req.params.id
       getOrder(id)
-        .then(order => res.json(order))
-        .catch(err =>
+        .then((order) => res.json(order))
+        .catch((err) =>
           res.status(500).json({ error: true, msg: 'unable to get order' })
         )
     }
@@ -40,10 +40,10 @@ module.exports = function(passport) {
   router.post(
     '/order/create',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
+    function (req, res) {
       createOrder(req.body)
-        .then(order => res.json({ success: true, msg: 'ok', order: order }))
-        .catch(err =>
+        .then((order) => res.json({ success: true, msg: 'ok', order: order }))
+        .catch((err) =>
           res
             .status(500)
             .json({ error: true, msg: `unable to create order err: ${err}` })
@@ -54,10 +54,10 @@ module.exports = function(passport) {
   router.post(
     '/order/update',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
+    function (req, res) {
       updateOrder(req.body)
-        .then(order => res.json({ success: true, msg: 'ok', order: order }))
-        .catch(err =>
+        .then((order) => res.json({ success: true, msg: 'ok', order: order }))
+        .catch((err) =>
           res
             .status(500)
             .json({ error: true, msg: `unable to update order err: ${err}` })
@@ -68,13 +68,13 @@ module.exports = function(passport) {
   router.post(
     '/orders/print',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
+    function (req, res) {
       const { orderIds } = req.body
       getOrdersByIds(orderIds)
-        .then(orders => {
+        .then((orders) => {
           res.render('orders', { orders })
         })
-        .catch(err =>
+        .catch((err) =>
           res.status(500).send({ error: `unable to print orders err: ${err}` })
         )
     }
@@ -83,12 +83,12 @@ module.exports = function(passport) {
   router.post(
     '/orders/resend_email',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
+    function (req, res) {
       resendOrderConfirmationEmail(req.body.orderId)
-        .then(result => {
+        .then((result) => {
           res.json({ success: true, msg: 'ok' })
         })
-        .catch(err =>
+        .catch((err) =>
           res
             .status(500)
             .send({ error: 'unable to resend order confirmation email!' })

@@ -11,12 +11,12 @@ const {
   removeLineItems
 } = require('../services/wholesaleorder')
 
-module.exports = function(passport) {
+module.exports = function (passport) {
   router.post(
     '/wholesaleorders',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
-      getWholesaleOrders(req.body).then(result =>
+    function (req, res) {
+      getWholesaleOrders(req.body).then((result) =>
         res.json({
           data: result.rows,
           page: req.body && req.body.page ? req.body.page : 0,
@@ -29,8 +29,8 @@ module.exports = function(passport) {
   router.post(
     '/wholesaleorders/lineitems',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
-      getLineItems(req.body).then(result =>
+    function (req, res) {
+      getLineItems(req.body).then((result) =>
         res.json({
           data: result.rows,
           page: req.body && req.body.page ? req.body.page : 0,
@@ -43,11 +43,11 @@ module.exports = function(passport) {
   router.get(
     '/wholesaleorder/:id',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
+    function (req, res) {
       const id = req.params.id
       getWholesaleOrder(id)
-        .then(order => res.json(order))
-        .catch(err =>
+        .then((order) => res.json(order))
+        .catch((err) =>
           res.status(500).json({ error: true, msg: 'unable to get order' })
         )
     }
@@ -56,16 +56,16 @@ module.exports = function(passport) {
   router.post(
     '/wholesaleorder/create',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
+    function (req, res) {
       createWholesaleOrder(req.body)
-        .then(order =>
+        .then((order) =>
           res.json({
             success: true,
             msg: 'Wholesale Order created!',
             order: order
           })
         )
-        .catch(err =>
+        .catch((err) =>
           res.status(500).json({
             error: true,
             msg: `unable to create wholesale order err: ${err}`
@@ -77,16 +77,16 @@ module.exports = function(passport) {
   router.post(
     '/wholesaleorder/upsert',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
+    function (req, res) {
       upsertWholesaleOrder(req.body)
-        .then(order =>
+        .then((order) =>
           res.json({
             success: true,
             msg: 'Wholesale Order saved!',
             order: order
           })
         )
-        .catch(err =>
+        .catch((err) =>
           res.status(500).json({
             error: true,
             msg: `unable to update wholesale order err: ${err}`
@@ -98,16 +98,16 @@ module.exports = function(passport) {
   router.post(
     '/wholesaleorder/addlineitems',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
+    function (req, res) {
       addLineItems(req.body)
-        .then(order =>
+        .then((order) =>
           res.json({
             success: true,
             msg: 'line items added!',
             order: order
           })
         )
-        .catch(err =>
+        .catch((err) =>
           res.status(500).json({
             error: true,
             msg: `unable to update line items err: ${err}`
@@ -119,10 +119,10 @@ module.exports = function(passport) {
   router.delete(
     '/wholesaleorder',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
+    function (req, res) {
       destroyWholesaleOrder(req.body)
         .then(() => res.json({ msg: 'wholesale order destroyed!' }))
-        .catch(err =>
+        .catch((err) =>
           res.status(500).json({
             error: true,
             msg: `o noz! unable to destroy wholesale order ${err}`
@@ -134,10 +134,10 @@ module.exports = function(passport) {
   router.delete(
     '/wholesaleorder/removelineitem',
     passport.authenticate('jwt', { session: false }),
-    function(req, res) {
+    function (req, res) {
       removeLineItems(req.body)
         .then(() => res.json({ msg: 'line item removed!' }))
-        .catch(err =>
+        .catch((err) =>
           res.status(500).json({
             error: true,
             msg: `o noz! unable to remove line items ${err}`
