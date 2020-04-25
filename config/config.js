@@ -5,8 +5,8 @@ module.exports = {
     username: process.env.PG_DATABASE_USER,
     password: process.env.PG_DATABASE_PASSWORD,
     database: process.env.PG_DATABASE_NAME,
-    host: '127.0.0.1',
-    port: 5432,
+    host: process.env.PG_DATABASE_HOST || '127.0.0.1',
+    port: process.env.PG_DATABASE_PORT || 5432,
     // ssl: true,
     // dialectOptions: {
     //   ssl: {

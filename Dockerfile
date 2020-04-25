@@ -11,4 +11,5 @@ COPY . /app
 
 EXPOSE 3000
 USER node   
-CMD ["node", "server.js"] 
+# npm start does seem to trap signals better than node server.js ...soooo:
+CMD ["npm", "start"]
