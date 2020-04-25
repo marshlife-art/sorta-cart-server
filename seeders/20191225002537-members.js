@@ -1,5 +1,5 @@
 'use strict'
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcrypt')
 const models = require('../models')
 
 module.exports = {

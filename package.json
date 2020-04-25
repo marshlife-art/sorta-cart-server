@@ -1,6 +1,6 @@
 {
   "name": "sorta-cart-server",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "API for sorta-cart",
   "main": "server.js",
   "scripts": {
@@ -17,7 +17,7 @@
   "author": "edwardsharp",
   "license": "ISC",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "csv-parser": "^2.3.2",
