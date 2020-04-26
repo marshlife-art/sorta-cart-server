@@ -102,15 +102,17 @@ const getMyOrders = async (UserId) => {
     where: {
       UserId
     }
-  }).then((member) => member.id)
+  }).then((member) => (member && member.id) || undefined)
+
+  const where =
+    MemberId !== undefined
+      ? {
+          [Op.or]: [{ UserId }, { MemberId }]
+        }
+      : { UserId }
 
   return await Order.findAll({
-    where: {
-      [Op.or]: {
-        UserId,
-        MemberId
-      }
-    },
+    where,
     include: [OrderLineItem, User, Member]
   })
 }

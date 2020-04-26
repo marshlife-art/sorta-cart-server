@@ -99,6 +99,38 @@ cat the_dump_file.sql | docker exec -i sorta-cart-server_pg_1 psql -U postgres
 psql -U $PG_DATABASE_USER -h $PG_DATABASE_HOST -p $PG_DATABASE_PORT -d $PG_DATABASE_NAME --set=sslmode=require < dump_30-01-2020_03_49_48.sql
 ```
 
+### kubernetes (digialocean hosted)
+
+##### SETUP
+
+```
+doctl auth init --context marsh
+doctl auth switch --context marsh
+
+doctl kubernetes cluster kubeconfig save marsh-netez
+```
+
+##### ENV VARZ
+
+```
+kubectl set env deployment/sorta-cart-server --list
+
+kubectl set env deployment/sorta-cart-server SOME_ENV_VAR=some_value
+```
+
+##### LOGS
+
+```
+kubectl get pods
+kubectl logs sorta-cart-server-564b889d88-7dvmx
+```
+
+##### UPDATE
+
+```
+kubectl set image deployments/sorta-cart-server sorta-cart-server=3dwardsharp/sorta-cart-server:0.0.9
+```
+
 ### MISC
 
 #### sequelize CLI
