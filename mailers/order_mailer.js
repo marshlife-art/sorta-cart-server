@@ -37,7 +37,7 @@ const sendOrderConfirmationEmail = (order) => {
               : order.email,
           subject: 'Your receipt from MARSH COOP',
           // text: 'order receipt'
-          html: template({ orders: [order] })
+          html: template({ orders: [order.toJSON()] })
         },
         function (error, body) {
           // error && console.warn(body)
