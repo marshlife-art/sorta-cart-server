@@ -1,11 +1,12 @@
 {
   "name": "sorta-cart-server",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "description": "API for sorta-cart",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "test": "NODE_ENV=test nyc --reporter=text mocha --recursive",
+    "test:watch": "NODE_ENV=test mocha --recursive --watch",
     "test:coverage": "NODE_ENV=test nyc --reporter=text --reporter=html mocha --recursive && nyc report --reporter=text > coverage.txt",
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all",
