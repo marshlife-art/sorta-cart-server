@@ -37,7 +37,8 @@ module.exports = {
     ssl: true,
     dialectOptions: {
       ssl: {
-        require: true
+        require: true,
+        ca: [process.env.PG_CA_CERT]
       },
       searchPath: process.env.PG_DATABASE_NAME
     },
