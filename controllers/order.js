@@ -72,7 +72,9 @@ module.exports = function (passport) {
       const { orderIds } = req.body
       getOrdersByIds(orderIds)
         .then((orders) => {
-          res.render('orders', { orders })
+          res.render('orders', {
+            orders: orders.map((order) => order.toJSON())
+          })
         })
         .catch((err) =>
           res.status(500).send({ error: `unable to print orders err: ${err}` })
