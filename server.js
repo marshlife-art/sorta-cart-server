@@ -45,7 +45,7 @@ app.options('*', cors())
 app.use(passport.initialize())
 
 // parse application/json
-app.use(bodyParser.json())
+app.use(bodyParser.json({ limit: '10mb' }))
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }))
 
