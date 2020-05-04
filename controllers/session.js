@@ -95,7 +95,7 @@ module.exports = function (passport) {
           member.fees_paid * 100,
           `Member Registration ${member.name} ${user.email}`
         )
-        console.log('[session] register paymentResponse:', paymentResponse)
+        // console.log('[session] register paymentResponse:', paymentResponse)
       } catch (e) {
         res.status(500)
         res.send({ error: 'payment error' })

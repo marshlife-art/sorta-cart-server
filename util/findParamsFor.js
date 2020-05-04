@@ -33,6 +33,12 @@ const findParamsFor = (query) => {
               [Op.or]: filter.value.map((val) => ({ [iLike]: `%${val}%` }))
             }
           }
+        } else if (filter.column.field === 'description') {
+          filters = {
+            description: {
+              [Op.or]: { [iLike]: `%${filter.value}%` }
+            }
+          }
         } else if (Array.isArray(filter.value)) {
           filters = {
             [filter.column.field]: { [Op.or]: filter.value }

@@ -226,6 +226,31 @@
       </tr>
       {{/each_when}}
 
+      {{#each_when this.OrderLineItems "kind" "credit"}}
+      <tr class="li">
+        <td colspan="2">{{this.description}}</td>
+        <td align="left">{{this.quantity}}</td>
+        <td></td>
+        <td align="right">{{this.price}}</td>
+        <td align="right">{{this.total}}</td>
+      </tr>
+      {{/each_when}}
+
+      {{#if ../balanceDue}}
+      <tr>
+        <td colspan="2" align="right">
+          <b>Balance Due </b>
+        </td>
+        <td colspan="3" align="center">
+          <a href="https://www.marshcoop.org/order/{{this.id}}" target="_blank" rel="noopener noreferrer">Click here to
+            view order and make a payment.</a>
+        </td>
+        <td align="right">
+          <b>{{../balance}}</b>
+        </td>
+      </tr>
+      {{/if}}
+
       <tr>
         <td colspan="5"></td>
         <td align="center" class="total left-border"><b>TOTAL</b></td>

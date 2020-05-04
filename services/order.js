@@ -117,6 +117,31 @@ const getMyOrders = async (UserId) => {
   })
 }
 
+const getMyOrder = async (UserId, OrderId) => {
+  if (!UserId || !OrderId) {
+    throw new Error('no such user or order!')
+  }
+
+  const MemberId = await Member.findOne({
+    where: {
+      UserId
+    }
+  }).then((member) => (member && member.id) || undefined)
+
+  const where =
+    MemberId !== undefined
+      ? {
+          [Op.or]: [{ UserId }, { MemberId }],
+          [Op.and]: { id: OrderId }
+        }
+      : { [Op.and]: { id: OrderId, UserId } }
+
+  return await Order.findOne({
+    where,
+    include: [OrderLineItem, User, Member]
+  })
+}
+
 const validateLineItems = async (lineItems) => {
   // console.log('validateLineItems lineItems:', lineItems)
   // #TOOOOOODOOOOOO :/
@@ -185,6 +210,194 @@ const resendOrderConfirmationEmail = async (orderId) => {
   )
 }
 
+const getStoreCreditForMember = async (MemberId) => {
+  if (MemberId === undefined) {
+    return 0
+  }
+
+  const orderIds = await Order.findAll({
+    attributes: ['id'],
+    where: {
+      MemberId
+    },
+    raw: true
+  }).then((orders) => orders.map((order) => order.id))
+
+  // note: the map reduce used for these two sums are a bit superflous, in that findAll
+  // returns a collection but 'sum' will return a collection of one e.g. [{total: 6.66}]
+  const credits = await OrderLineItem.findAll({
+    where: {
+      OrderId: orderIds,
+      kind: 'credit'
+    },
+    attributes: [
+      [models.Sequelize.fn('sum', models.Sequelize.col('total')), 'total']
+    ],
+    raw: true
+  }).then((orders) =>
+    orders
+      .map(({ total }) => (total ? parseFloat(total) : 0))
+      .reduce((sum, i) => sum + i, 0)
+  )
+
+  const adjustments = await OrderLineItem.findAll({
+    where: {
+      OrderId: orderIds,
+      kind: 'adjustment',
+      description: { [iLike]: '%store credit%' }
+    },
+    attributes: [
+      [models.Sequelize.fn('sum', models.Sequelize.col('total')), 'total']
+    ],
+    raw: true
+  }).then((orders) =>
+    orders
+      .map(({ total }) => (total ? parseFloat(total) : 0))
+      .reduce((sum, i) => sum + i, 0)
+  )
+
+  return parseFloat((credits + Math.abs(adjustments)).toFixed(2))
+}
+
+const getStoreCredit = async (UserId) => {
+  if (UserId === undefined) {
+    return 0
+  }
+
+  const MemberId = await Member.findOne({
+    where: {
+      UserId
+    },
+    attributes: ['id'],
+    raw: true
+  }).then((member) => (member && member.id) || undefined)
+
+  if (!MemberId) {
+    return 0
+  }
+
+  return getStoreCreditForMember(MemberId)
+}
+
+const getStoreCreditLineItemsForMember = async (MemberId) => {
+  if (MemberId === undefined) {
+    return 0
+  }
+
+  const orderIds = await Order.findAll({
+    attributes: ['id'],
+    where: {
+      MemberId
+    },
+    attributes: ['id'],
+    raw: true
+  }).then((orders) => orders.map((order) => order.id))
+
+  // note: the map reduce used for these two sums are a bit superflous, in that findAll
+  // returns a collection but 'sum' will return a collection of one e.g. [{total: 6.66}]
+  const credits_sum = await OrderLineItem.findAll({
+    where: {
+      OrderId: orderIds,
+      kind: 'credit'
+    },
+    attributes: [
+      [models.Sequelize.fn('sum', models.Sequelize.col('total')), 'total']
+      // 'price',
+      // 'description',
+      // 'OrderId'
+    ],
+    raw: true
+  }).then((orders) =>
+    orders
+      .map(({ total }) => (total ? parseFloat(total) : 0))
+      .reduce((sum, i) => sum + i, 0)
+  )
+
+  const adjustments_sum = await OrderLineItem.findAll({
+    where: {
+      OrderId: orderIds,
+      kind: 'adjustment',
+      description: { [iLike]: '%store credit%' }
+    },
+    attributes: [
+      [models.Sequelize.fn('sum', models.Sequelize.col('total')), 'total']
+      // 'price',
+      // 'description',
+      // 'OrderId'
+    ],
+    raw: true
+  }).then((orders) =>
+    orders
+      .map(({ total }) => (total ? parseFloat(total) : 0))
+      .reduce((sum, i) => sum + i, 0)
+  )
+
+  const credits = await OrderLineItem.findAll({
+    where: {
+      OrderId: orderIds,
+      kind: 'credit'
+    },
+    raw: true
+  })
+
+  const adjustments = await OrderLineItem.findAll({
+    where: {
+      OrderId: orderIds,
+      kind: 'adjustment',
+      description: { [iLike]: '%store credit%' }
+    },
+    raw: true
+  })
+
+  return { credits_sum, adjustments_sum, credits, adjustments }
+}
+
+const getStoreCreditReport = async () => {
+  const members = await Member.findAll({
+    raw: true
+  })
+
+  const rows = await Promise.all(
+    members.map(async (member) => {
+      const {
+        credits_sum,
+        adjustments_sum,
+        credits,
+        adjustments
+      } = await getStoreCreditLineItemsForMember(member.id)
+
+      const store_credit = parseFloat(
+        (credits_sum + Math.abs(adjustments_sum)).toFixed(2)
+      )
+
+      return adjustments.length || credits.length
+        ? {
+            ...member,
+            credits,
+            credits_sum,
+            adjustments,
+            adjustments_sum,
+            store_credit
+          }
+        : undefined
+    })
+  )
+
+  return rows
+    .filter((o) => o)
+    .sort(function (a, b) {
+      return a.store_credit - b.store_credit
+    })
+}
+
+const getMemberOrders = async (MemberId) => {
+  return await Order.findAll({
+    where: { MemberId },
+    attributes: ['id', 'createdAt', 'item_count', 'total'],
+    raw: true
+  })
+}
+
 module.exports = {
   getOrders,
   getOrder,
@@ -193,5 +406,10 @@ module.exports = {
   getOrdersByIds,
   validateLineItems,
   getMyOrders,
-  resendOrderConfirmationEmail
+  getMyOrder,
+  resendOrderConfirmationEmail,
+  getStoreCredit,
+  getStoreCreditForMember,
+  getStoreCreditReport,
+  getMemberOrders
 }

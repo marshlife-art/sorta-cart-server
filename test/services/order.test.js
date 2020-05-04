@@ -1,5 +1,10 @@
 const assert = require('assert')
-const { getOrders, getOrder, createOrder } = require('../../services/order')
+const {
+  getOrders,
+  getOrder,
+  createOrder,
+  getStoreCredit
+} = require('../../services/order')
 const { createFakerOrders, ORDER } = require('../fixtures/orders')
 
 const FAKE_ORDER_COUNT = 10
@@ -41,6 +46,12 @@ describe('services', function () {
       })
       assert.equal(orders.count, 1)
       assert.equal(orders.rows.length, 1)
+    })
+
+    it('should getStoreCredit', async function () {
+      const orders = await getStoreCredit(1)
+      console.log('getStoreCredit orders:', orders)
+      assert.equal(orders, false)
     })
   })
 })

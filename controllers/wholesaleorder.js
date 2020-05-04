@@ -8,7 +8,8 @@ const {
   getLineItems,
   addLineItems,
   destroyWholesaleOrder,
-  removeLineItems
+  removeLineItems,
+  createOrderCredits
 } = require('../services/wholesaleorder')
 
 module.exports = function (passport) {
@@ -141,6 +142,21 @@ module.exports = function (passport) {
           res.status(500).json({
             error: true,
             msg: `o noz! unable to remove line items ${err}`
+          })
+        )
+    }
+  )
+
+  router.post(
+    '/wholesaleorder/issuecredits',
+    passport.authenticate('jwt', { session: false }),
+    function (req, res) {
+      createOrderCredits(req.body)
+        .then(() => res.json({ msg: 'credits issued!' }))
+        .catch((err) =>
+          res.status(500).json({
+            error: true,
+            msg: `o noz! unable to issue credits ${err}`
           })
         )
     }

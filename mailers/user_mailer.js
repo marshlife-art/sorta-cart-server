@@ -9,6 +9,15 @@ const mailgun = require('mailgun-js')({
       : process.env.TEST_MAILGUN_DOMAIN
 })
 
+const HOST =
+  process.env.NODE_ENV === 'production'
+    ? 'https://www.marshcoop.org'
+    : 'http://localhost:3002'
+const ADMIN_HOST =
+  process.env.NODE_ENV === 'production'
+    ? 'https://admin.marshcoop.org'
+    : 'http://localhost:3001'
+
 const sendConfirmationEmail = (email, regKey) => {
   return new Promise(function (resolve, reject) {
     if (process.env.NODE_ENV === 'test') {
@@ -20,10 +29,10 @@ const sendConfirmationEmail = (email, regKey) => {
           from: 'MARSH COOP <noreply@marshcoop.org>',
           to: email,
           subject: 'Confirm your email',
-          text: `Use this link to confirm your email: https://marshcoop.org/confirm?regKey=${regKey}`
+          text: `Use this link to confirm your email: ${HOST}/confirm?regKey=${regKey}`
         },
         function (error, body) {
-          console.log(body)
+          // console.log(body)
           error ? reject(error) : resolve()
         }
       )
@@ -44,10 +53,10 @@ const sendAdminRegistrationEmail = (email, regKey) => {
           from: 'MARSH COOP <noreply@marshcoop.org>',
           to: email,
           subject: 'Confirm your email',
-          text: `Use this link to confirm your email and complete the registration process. https://admin.marshcoop.org/confirm?regKey=${regKey}`
+          text: `Use this link to confirm your email and complete the registration process. ${ADMIN_HOST}/confirm?regKey=${regKey}`
         },
         function (error, body) {
-          console.log(body)
+          // console.log(body)
           error ? reject(error) : resolve()
         }
       )
@@ -68,10 +77,10 @@ const sendPasswordResetEmail = (email, regKey) => {
           from: 'MARSH COOP <noreply@marshcoop.org>',
           to: email,
           subject: 'Reset password',
-          text: `Use this link to reset your password: https://marshcoop.org/resetpassword?regKey=${regKey}`
+          text: `Use this link to reset your password: ${HOST}/resetpassword?regKey=${regKey}`
         },
         function (error, body) {
-          console.log(body)
+          // console.log(body)
           error ? reject(error) : resolve()
         }
       )

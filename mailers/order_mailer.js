@@ -28,6 +28,23 @@ const sendOrderConfirmationEmail = (order) => {
       // fuhgeddaboudit!
       resolve()
     } else if (order && order.email) {
+      const line_items = order.OrderLineItems || []
+      const payments = line_items.filter((li) => li.kind === 'payment')
+      const paymentsTotal = payments.reduce(
+        (acc, v) => acc + parseFloat(`${v.total}`),
+        0
+      )
+      const credits = line_items.filter((li) => li.kind === 'credit')
+      const creditsTotal = credits.reduce(
+        (acc, v) => acc + parseFloat(`${v.total}`),
+        0
+      )
+      const balance =
+        parseFloat(`${order.total}`) +
+        parseFloat(`${creditsTotal}`) +
+        parseFloat(`${paymentsTotal}`)
+      const balanceDue = balance > 0
+
       mailgun.messages().send(
         {
           from: 'MARSH COOP <noreply@marshcoop.org>',
@@ -35,9 +52,13 @@ const sendOrderConfirmationEmail = (order) => {
             process.env.NODE_ENV === 'development'
               ? 'edward@edwardsharp.net'
               : order.email,
+          bcc:
+            process.env.NODE_ENV === 'development'
+              ? 'MARSH ORDERS <edward@edwardsharp.net>'
+              : 'MARSH ORDERS <bioculturalist@gmail.com>',
           subject: 'Your receipt from MARSH COOP',
           // text: 'order receipt'
-          html: template({ orders: [order.toJSON()] })
+          html: template({ orders: [order.toJSON()], balance, balanceDue })
         },
         function (error, body) {
           // error && console.warn(body)
