@@ -77,13 +77,12 @@ module.exports = function (passport) {
     '/store/freecheckout',
     passport.authenticate('jwt', { session: false }),
     async function (req, res) {
-      const { order, nonce } = req.body
+      const { order } = req.body
 
       if (
         !order ||
         !order.name ||
         !order.email ||
-        parseInt(order.total) !== 0 ||
         !order.OrderLineItems ||
         order.OrderLineItems.length === 0
       ) {
@@ -94,7 +93,7 @@ module.exports = function (passport) {
 
       createOrder({
         ...order,
-        payment_status: 'paid'
+        payment_status: parseInt(order.total) === 0 ? 'paid' : 'balance_due'
       })
         .then((order) => {
           sendOrderConfirmationEmail(order).catch(console.warn)
