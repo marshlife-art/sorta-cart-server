@@ -165,16 +165,26 @@ module.exports = function (passport) {
     if (email && password) {
       const user = await getUserByEmail(email)
       if (user && user.validPassword(password)) {
+        // so JWK cookie auth magic, here.
+        // stash an auth_key in the token to strengthen the user lookup in the JWTStrategy fn
+        // remember fetch() needs {credentials: true} for this /login request to preserve the cookie
         const auth_key = user.auth_key ? user.auth_key : user.generateAuthKey()
         const payload = { id: user.id, auth_key }
         const token = jwt.sign(payload, process.env.JWT_SECRET)
+        const ONE_DAY_MILLISECONDS = 1000 * 60 * 60 * 24
+        res.cookie('token', token, {
+          httpOnly: true,
+          secure: true, // process.env.NODE_ENV === 'production'
+          sameSite: 'strict',
+          maxAge: ONE_DAY_MILLISECONDS * 30
+        })
+
         res.json({
           msg: 'ok',
           user: {
             id: user.id,
             email: user.email,
-            role: user.role,
-            token: token
+            role: user.role
           }
         })
       } else {
@@ -206,9 +216,8 @@ module.exports = function (passport) {
     '/check_session',
     passport.authenticate('jwt', { session: false }),
     async function (req, res) {
-      const reqUser = await req.user
-      if (reqUser && reqUser.dataValues && reqUser.dataValues.id) {
-        const user = reqUser.dataValues
+      const user = req.user
+      if (user && user.id) {
         res.json({
           msg: 'ok',
           user: { id: user.id, email: user.email, role: user.role }

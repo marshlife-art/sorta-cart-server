@@ -1,33 +1,40 @@
 require('dotenv').config()
 const express = require('express')
+const cookieParser = require('cookie-parser')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const passport = require('passport')
-const passportJWT = require('passport-jwt')
+const JWTStrategy = require('passport-jwt').Strategy
 const exphbs = require('express-handlebars')
 
 const { getUser } = require('./services/user')
 
-const jwtOptions = {
-  jwtFromRequest: passportJWT.ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
-}
-const strategy = new passportJWT.Strategy(jwtOptions, async function (
-  jwt_payload,
-  next
-) {
-  if (jwt_payload.auth_key) {
-    const user = await getUser({ auth_key: jwt_payload.auth_key })
-    if (user) {
-      next(null, user)
-    } else {
-      next(null, false)
+passport.use(
+  new JWTStrategy(
+    {
+      jwtFromRequest: (req) => {
+        return req.cookies.token
+      },
+      secretOrKey: process.env.JWT_SECRET
+    },
+    async (jwtPayload, done) => {
+      if (Date.now() > jwtPayload.expires) {
+        return done('jwt expired')
+      }
+
+      if (jwtPayload.auth_key) {
+        const user = await getUser({ auth_key: jwtPayload.auth_key })
+        if (user) {
+          return done(null, user)
+        } else {
+          return done(null, false)
+        }
+      }
+
+      return done(null, jwtPayload)
     }
-  } else {
-    next(null, false)
-  }
-})
-passport.use(strategy)
+  )
+)
 
 const app = express()
 
@@ -37,10 +44,25 @@ const corsOptions = {
     'https://marshcoop.org',
     'https://www.marshcoop.org'
   ],
+  credentials: true,
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204, i guess.
+}
+
+if (process.env.NODE_ENV === 'development') {
+  console.log('using dev cors originz')
+  corsOptions.origin = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'https://admin.marsh.dev',
+    'https://marsh.dev',
+    'https://www.marsh.dev'
+  ]
 }
 app.use(cors(corsOptions))
 app.options('*', cors())
+
+app.use(cookieParser())
 
 app.use(passport.initialize())
 
@@ -74,6 +96,8 @@ app.use(function (req, res) {
 })
 
 const port = process.env.PORT || 3000
-app.listen(port, function () {
+const isRunning = () => {
   console.log(`sorta-cart-server is running on port ${port}`)
-})
+}
+
+app.listen(port, isRunning)
