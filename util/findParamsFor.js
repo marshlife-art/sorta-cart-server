@@ -39,6 +39,12 @@ const findParamsFor = (query) => {
               [Op.or]: { [iLike]: `%${filter.value}%` }
             }
           }
+        } else if (filter.column.field === 'import_tag') {
+          filters = {
+            import_tag: {
+              [Op.or]: { [iLike]: `%${filter.value}%` }
+            }
+          }
         } else if (Array.isArray(filter.value)) {
           filters = {
             [filter.column.field]: { [Op.or]: filter.value }

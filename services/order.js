@@ -398,6 +398,18 @@ const getMemberOrders = async (MemberId) => {
   })
 }
 
+const getRecentOrders = async () => {
+  return await models.sequelize.query(
+    `SELECT * FROM "Orders" WHERE "createdAt" BETWEEN
+  NOW()::DATE-EXTRACT(DOW FROM NOW())::INTEGER-14 
+  AND NOW() ORDER BY "createdAt" DESC;`,
+    {
+      model: Order,
+      mapToModel: true
+    }
+  )
+}
+
 module.exports = {
   getOrders,
   getOrder,
@@ -411,5 +423,6 @@ module.exports = {
   getStoreCredit,
   getStoreCreditForMember,
   getStoreCreditReport,
-  getMemberOrders
+  getMemberOrders,
+  getRecentOrders
 }
