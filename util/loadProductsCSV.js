@@ -36,6 +36,8 @@ const KNOWN_HEADERS = [
   'u_price_markup',
   'category',
   'sub_category',
+  'count_on_hand',
+  'no_backorder',
   'codes',
   ...CODE_COLZ
 ]

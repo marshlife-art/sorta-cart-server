@@ -10,7 +10,9 @@ const {
   destroyProducts,
   getProductVendors,
   getProductImportTags,
-  addProducts
+  addProducts,
+  getProductStock,
+  addStock
 } = require('../services/product')
 
 const upload = multer({
@@ -40,6 +42,16 @@ const upload = multer({
 module.exports = function (passport) {
   router.post('/products', function (req, res) {
     getProducts(req.body).then((result) =>
+      res.json({
+        data: result.rows,
+        page: req.body && req.body.page ? req.body.page : 0,
+        totalCount: result.count
+      })
+    )
+  })
+
+  router.post('/products/stock', function (req, res) {
+    getProductStock(req.body).then((result) =>
       res.json({
         data: result.rows,
         page: req.body && req.body.page ? req.body.page : 0,
@@ -163,6 +175,41 @@ module.exports = function (passport) {
               fs.unlink(req.file.path, () => {})
             })
         }
+      }
+    }
+  )
+
+  //addStock
+  router.post(
+    '/products/add_stock',
+    passport.authenticate('jwt', { session: false }),
+    upload.single('file'),
+    function (req, res, next) {
+      if (req.fileValidationError) {
+        res.send({ error: req.fileValidationError })
+      } else {
+        const { dryrun } = req.body
+        addStock(dryrun, req.file.path)
+          .then((res) => {
+            const unknownRowsString = res.unknownRows.length
+              ? `${res.unknownRows.length} rows didn't match a product: ${res.unknownRows}`
+              : ''
+            if (dryrun === 'false') {
+              return `${res.productsUpdated} products updated. ${unknownRowsString}`
+            } else {
+              return `Dry Run! ${res.productsUpdated} products will get updated. ${unknownRowsString}`
+            }
+          })
+          .then((response) => res.json({ msg: response }))
+          .catch((err) =>
+            res.status(500).json({
+              error: true,
+              msg: `Unable to add stock! ${err}`
+            })
+          )
+          .finally(() => {
+            fs.unlink(req.file.path, () => {})
+          })
       }
     }
   )

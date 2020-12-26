@@ -1,6 +1,7 @@
 const findParamsFor = require('../util/findParamsFor')
 const models = require('../models')
 const loadProductsCSV = require('../util/loadProductsCSV')
+const loadStock = require('../util/loadStock')
 
 const Product = models.Product
 const Op = models.Sequelize.Op
@@ -66,6 +67,48 @@ const getProductVendors = async () =>
 const getProductImportTags = async () =>
   Product.aggregate('import_tag', 'DISTINCT', { plain: false })
 
+const getProductStock = async (query) => {
+  // this is mostly same as getProducts() fn ++ count_on_hand IS NOT NULL
+  // get fucked abstractionz (long live copy&paste!) :/
+
+  let findParams = findParamsFor(query)
+
+  const q = query.search || ''
+  if (q) {
+    const filters = [
+      {
+        name: { [Op.and]: q.split(' ').map((val) => ({ [iLike]: `%${val}%` })) }
+      },
+      {
+        description: {
+          [Op.and]: q.split(' ').map((val) => ({ [iLike]: `%${val}%` }))
+        }
+      },
+      { sub_category: { [iLike]: `%${q}%` } },
+      { category: { [iLike]: `%${q}%` } }
+    ]
+
+    if (findParams.where[Op.or] && findParams.where[Op.or].length) {
+      findParams.where[Op.or].push(filters)
+    } else {
+      findParams.where[Op.or] = filters
+    }
+  }
+
+  // push in some special findParams to SELECT products WHERE count_on_hand IS NOT NULL;
+  if (findParams.where[Op.and] && findParams.where[Op.and].length) {
+    findParams.where[Op.and].push({
+      count_on_hand: { [Op.ne]: null }
+    })
+  } else {
+    findParams.where[Op.and] = {
+      count_on_hand: { [Op.ne]: null }
+    }
+  }
+
+  return await Product.findAndCountAll(findParams)
+}
+
 const addProducts = async (
   vendor,
   import_tag,
@@ -98,6 +141,35 @@ const addProducts = async (
   )
 }
 
+const addStock = async (dryrun, csvFile) => {
+  const products = await loadStock(csvFile)
+
+  let productsUpdated = 0
+  let unknownRows = []
+
+  for (const p of products) {
+    if (p.zero_key && p.zero_val) {
+      const product = await Product.findOne({
+        where: { [p.zero_key]: p.zero_val }
+      })
+      if (product && !isNaN(parseInt(p.on_hand_change))) {
+        if (dryrun === 'false') {
+          product.addCountOnHand(p.on_hand_change)
+        }
+        productsUpdated += 1
+      } else {
+        const idx = products.indexOf(p)
+        unknownRows.push(idx)
+      }
+    } else {
+      const idx = products.indexOf(p)
+      unknownRows.push(idx)
+    }
+  }
+
+  return { productsUpdated, unknownRows }
+}
+
 module.exports = {
   getProducts,
   getCategories,
@@ -105,5 +177,7 @@ module.exports = {
   destroyProducts,
   getProductVendors,
   getProductImportTags,
-  addProducts
+  getProductStock,
+  addProducts,
+  addStock
 }

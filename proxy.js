@@ -26,6 +26,12 @@ const server = https.createServer({ key: key, cert: cert }, (req, res) => {
   //   target
   // )
   proxy.web(req, res, { target })
+  proxy.on('error', function (err, req, res) {
+    if (req.socket.destroyed && err.code === 'ECONNRESET') {
+      console.warn('gonna abort!')
+      req._proxyReq.abort()
+    }
+  })
 })
 
 try {

@@ -49,6 +49,10 @@ const findParamsFor = (query) => {
           filters = {
             [filter.column.field]: { [Op.or]: filter.value }
           }
+        } else if (filter.column.type === 'boolean') {
+          filters = {
+            [filter.column.field]: filter.value === 'checked' ? true : false
+          }
         } else {
           filters = {
             [filter.column.field]: filter.value
@@ -68,6 +72,7 @@ const findParamsFor = (query) => {
     })
   }
 
+  console.log('findParams:', JSON.stringify(findParams))
   return findParams
 }
 
