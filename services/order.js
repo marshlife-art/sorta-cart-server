@@ -45,7 +45,26 @@ const createOrder = async (order) => {
   delete order.updatedAt
   order.OrderLineItems.map((oli) => delete oli.id)
 
-  return await Order.create(order, { include: [OrderLineItem] })
+  const createdOrder = await Order.create(order, { include: [OrderLineItem] })
+  for await (let oli of createdOrder.OrderLineItems) {
+    if (oli?.data?.product?.id && oli?.data?.product?.count_on_hand) {
+      console.log(
+        'adjusting oli.quantity decrement:',
+        parseInt(`${oli.quantity}`)
+      )
+      Product.decrement('count_on_hand', {
+        by: parseInt(`${oli.quantity}`),
+        where: { id: oli.data.product.id }
+      }).catch((error) =>
+        console.warn(
+          'caught error trying to decrement Product.count_on_hand! err:',
+          error
+        )
+      )
+    }
+  }
+
+  return createdOrder
 }
 
 const updateOrder = async (order) => {
