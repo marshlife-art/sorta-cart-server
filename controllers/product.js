@@ -12,7 +12,8 @@ const {
   getProductImportTags,
   addProducts,
   getProductStock,
-  addStock
+  addStock,
+  getStockCsv
 } = require('../services/product')
 
 const upload = multer({
@@ -59,6 +60,22 @@ module.exports = function (passport) {
       })
     )
   })
+
+  router.get(
+    '/products/stock_csv',
+    passport.authenticate('jwt', { session: false }),
+    function (req, res) {
+      getStockCsv()
+        .then((data) => {
+          res.attachment(`MARSH_ON_HAND_${Date.now()}.csv`)
+          res.status(200).send(data)
+        })
+        .catch((error) => {
+          console.warn('stock_csv caught error:', error)
+          res.status(500)
+        })
+    }
+  )
 
   router.get('/categories', function (req, res) {
     return getCategories().then((result) =>

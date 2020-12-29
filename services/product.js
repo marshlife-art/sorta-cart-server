@@ -2,6 +2,7 @@ const findParamsFor = require('../util/findParamsFor')
 const models = require('../models')
 const loadProductsCSV = require('../util/loadProductsCSV')
 const loadStock = require('../util/loadStock')
+const { parse } = require('json2csv')
 
 const Product = models.Product
 const Op = models.Sequelize.Op
@@ -149,6 +150,12 @@ const addStock = async (dryrun, csvFile) => {
 
   for (const p of products) {
     if (p.zero_key && p.zero_val) {
+      console.log(
+        'looking for product where p.zero_key:',
+        p.zero_key,
+        ' = ',
+        p.zero_val
+      )
       const product = await Product.findOne({
         where: { [p.zero_key]: p.zero_val }
       })
@@ -162,12 +169,23 @@ const addStock = async (dryrun, csvFile) => {
         unknownRows.push(idx)
       }
     } else {
+      console.log('zomg no zero key:', p)
       const idx = products.indexOf(p)
       unknownRows.push(idx)
     }
   }
 
   return { productsUpdated, unknownRows }
+}
+
+const getStockCsv = async () => {
+  const products = await Product.findAll({
+    where: {
+      count_on_hand: { [Op.ne]: null }
+    },
+    raw: true
+  })
+  return parse(products)
 }
 
 module.exports = {
@@ -179,5 +197,6 @@ module.exports = {
   getProductImportTags,
   getProductStock,
   addProducts,
-  addStock
+  addStock,
+  getStockCsv
 }
