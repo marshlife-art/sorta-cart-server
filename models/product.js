@@ -24,11 +24,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     {}
   )
-  Product.prototype.addCountOnHand = function (count_on_hand_change) {
+  Product.prototype.addCountOnHand = function (on_hand_count_change) {
     // try to make sure two values are integers
-    if (isNaN(parseInt(count_on_hand_change))) {
+    if (isNaN(parseInt(on_hand_count_change))) {
       console.warn(
-        'Product.addCountOnHand() count_on_hand_change is NaN returning early!'
+        'Product.addCountOnHand() on_hand_count_change is NaN returning early!'
       )
       return
     }
@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
 
     this.setDataValue(
       'count_on_hand',
-      initialCount + parseInt(count_on_hand_change)
+      initialCount + parseInt(on_hand_count_change)
     )
     this.save()
   }

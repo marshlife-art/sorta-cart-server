@@ -219,13 +219,13 @@ const addStock = async (dryrun, csvFile) => {
         where: { unf: p.unf, upc_code: p.upc_code }
       })
       if (
-        product?.id &&
-        (!isNaN(parseInt(p.count_on_hand_change)) ||
+        product &&
+        (!isNaN(parseInt(p.on_hand_count_change)) ||
           !isNaN(parseInt(p.count_on_hand)))
       ) {
         if (dryrun === 'false') {
-          if (!isNaN(parseInt(p.count_on_hand_change))) {
-            product.addCountOnHand(p.count_on_hand_change)
+          if (!isNaN(parseInt(p.on_hand_count_change))) {
+            product.addCountOnHand(p.on_hand_count_change)
           } else if (!isNaN(parseInt(p.count_on_hand))) {
             console.log('hard count_on_hand')
             product.count_on_hand = parseInt(p.count_on_hand)
@@ -234,6 +234,15 @@ const addStock = async (dryrun, csvFile) => {
         }
         productsUpdated += 1
       } else {
+        console.log(
+          'adding unknownRows cuz no product and on_hand_count_change or count_on_hand',
+          ' !isNaN(parseInt(p.on_hand_count_change)):',
+          !isNaN(parseInt(p.on_hand_count_change)),
+          ' !isNaN(parseInt(p.count_on_hand)):',
+          !isNaN(parseInt(p.count_on_hand)),
+          ' sooo p:',
+          p
+        )
         const idx = products.indexOf(p)
         unknownRows.push(idx)
       }
