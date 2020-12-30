@@ -115,31 +115,90 @@ const addProducts = async (
   import_tag,
   csvFile,
   prev_import_tag,
-  markup
+  markup,
+  force_check
 ) => {
-  return loadProductsCSV(csvFile, import_tag, vendor, markup).then(
-    (products) => {
-      return models.sequelize.transaction((t) => {
-        // chain all your queries here. make sure you return them.
-        if (prev_import_tag !== undefined && prev_import_tag !== '') {
-          return Product.destroy(
-            { where: { import_tag: prev_import_tag } },
-            { transaction: t }
-          ).then((destroyResponse) => {
-            return Product.bulkCreate(products, { transaction: t }).then(
-              (response) => {
-                return `success! first destroyed ${destroyResponse} products and then created ${response.length} products.`
-              }
-            )
-          })
-        } else {
-          return Product.bulkCreate(products).then((response) => {
-            return `success! created ${response.length} products!`
-          })
+  const productsOnHand = await Product.findAll({
+    attributes: ['id', 'unf', 'upc_code', 'count_on_hand'],
+    where: {
+      count_on_hand: {
+        [Op.and]: {
+          [Op.ne]: null,
+          [Op.ne]: 0
         }
+      }
+    },
+    raw: true
+  })
+
+  const products = await loadProductsCSV(csvFile, import_tag, vendor, markup)
+
+  console.log('zomg sooo productsOnHand:', productsOnHand)
+  const onHandIntersect = productsOnHand.map((oh) =>
+    products.find((p) => p.unf === oh.unf && p.upc_code === oh.upc_code)
+  )
+  console.log('onHandIntersect: ', onHandIntersect)
+
+  let existingIdsToDestroy = productsOnHand.reduce((acc, oh) => {
+    const product = products.find(
+      (p) => p.unf === oh.unf && p.upc_code === oh.upc_code
+    )
+    if (product) {
+      product.count_on_hand = oh.count_on_hand
+      acc.push(oh.id)
+    }
+    return acc
+  }, [])
+
+  if (force_check === 'true') {
+    console.log('zomg force_check true!!!!!')
+    const existingProductsToDestroy = []
+    for await (const p of products) {
+      const product = await Product.findOne({
+        attributes: ['id', 'count_on_hand'],
+        where: { unf: p.unf, upc_code: p.upc_code },
+        raw: true
+      })
+      if (product) {
+        p.count_on_hand = product.count_on_hand
+        existingProductsToDestroy.push(product.id)
+      }
+    }
+
+    existingIdsToDestroy = [
+      ...existingIdsToDestroy,
+      ...existingProductsToDestroy
+    ]
+  }
+
+  console.log('existingIdsToDestroy:', existingIdsToDestroy)
+  return models.sequelize.transaction((transaction) => {
+    // chain transaction queries here; make sure to return them.
+    if (
+      (prev_import_tag !== undefined && prev_import_tag !== '') ||
+      (existingIdsToDestroy && existingIdsToDestroy.length)
+    ) {
+      let where = {}
+      if (prev_import_tag !== undefined && prev_import_tag !== '') {
+        where = { import_tag: prev_import_tag }
+      }
+      if (existingIdsToDestroy && existingIdsToDestroy.length) {
+        where = { [Op.or]: { ...where, id: existingIdsToDestroy } }
+      }
+      console.log('destroy where:', where)
+      return Product.destroy({ where, transaction }).then((destroyResponse) => {
+        return Product.bulkCreate(products, {
+          transaction
+        }).then((response) => {
+          return `success! first destroyed ${destroyResponse} products and then created ${response.length} products.`
+        })
+      })
+    } else {
+      return Product.bulkCreate(products).then((response) => {
+        return `success! created ${response.length} products!`
       })
     }
-  )
+  })
 }
 
 const addStock = async (dryrun, csvFile) => {
@@ -149,19 +208,29 @@ const addStock = async (dryrun, csvFile) => {
   let unknownRows = []
 
   for (const p of products) {
-    if (p.zero_key && p.zero_val) {
+    if (p.unf && p.upc_code) {
       console.log(
-        'looking for product where p.zero_key:',
-        p.zero_key,
-        ' = ',
-        p.zero_val
+        'looking for product where p.unf:',
+        p.unf,
+        ' and upc_code:',
+        p.upc_code
       )
       const product = await Product.findOne({
-        where: { [p.zero_key]: p.zero_val }
+        where: { unf: p.unf, upc_code: p.upc_code }
       })
-      if (product && !isNaN(parseInt(p.on_hand_change))) {
+      if (
+        product?.id &&
+        (!isNaN(parseInt(p.count_on_hand_change)) ||
+          !isNaN(parseInt(p.count_on_hand)))
+      ) {
         if (dryrun === 'false') {
-          product.addCountOnHand(p.on_hand_change)
+          if (!isNaN(parseInt(p.count_on_hand_change))) {
+            product.addCountOnHand(p.count_on_hand_change)
+          } else if (!isNaN(parseInt(p.count_on_hand))) {
+            console.log('hard count_on_hand')
+            product.count_on_hand = parseInt(p.count_on_hand)
+            product.save()
+          }
         }
         productsUpdated += 1
       } else {
@@ -169,7 +238,7 @@ const addStock = async (dryrun, csvFile) => {
         unknownRows.push(idx)
       }
     } else {
-      console.log('zomg no zero key:', p)
+      console.log('zomg no unf and upc_code:', p)
       const idx = products.indexOf(p)
       unknownRows.push(idx)
     }

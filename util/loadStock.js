@@ -4,12 +4,10 @@ const csv = require('csv-parser')
 const fs = require('fs')
 
 const KNOWN_HEADERS = [
-  'id',
   'unf',
   'upc_code',
-  'name',
-  'description',
-  'on_hand_change'
+  'on_hand_count',
+  'on_hand_count_change'
 ]
 
 const HEADER_MAP = {
@@ -31,9 +29,6 @@ module.exports = (csv_path) => {
       .pipe(
         csv({
           mapHeaders: ({ header, index }) => {
-            if (index === 0) {
-              return `zeroindex__${header}`
-            }
             if (HEADER_MAP[header]) {
               return HEADER_MAP[header]
             }
@@ -48,11 +43,11 @@ module.exports = (csv_path) => {
         try {
           // console.log('have data:', data)
 
-          const zkey = Object.keys(data).filter((k) =>
-            k.match(/zeroindex__/)
-          )[0]
-          data.zero_key = zkey.replace('zeroindex__', '')
-          data.zero_val = data[zkey]
+          // const zkey = Object.keys(data).filter((k) =>
+          //   k.match(/zeroindex__/)
+          // )[0]
+          // data.zero_key = zkey.replace('zeroindex__', '')
+          // data.zero_val = data[zkey]
           // console.log(
           //   'have zero_key:',
           //   data.zero_key,

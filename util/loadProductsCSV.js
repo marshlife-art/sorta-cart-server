@@ -36,7 +36,6 @@ const KNOWN_HEADERS = [
   'u_price_markup',
   'category',
   'sub_category',
-  'count_on_hand',
   'no_backorder',
   'codes',
   ...CODE_COLZ
@@ -180,6 +179,9 @@ module.exports = (csv_path, import_tag, vendor, markup) => {
 
             const pk = data['pk'] && data['pk'].replace(',', '')
             data['pk'] = pk && !isNaN(parseInt(pk)) ? parseInt(pk) : 1 // i guess default 1 makes sense here
+
+            // no_backorder is BOOLEAN type
+            data['no_backorder'] = !!data['no_backorder']
 
             data['import_tag'] = import_tag
             data['vendor'] = vendor

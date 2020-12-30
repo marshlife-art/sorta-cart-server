@@ -166,7 +166,13 @@ module.exports = function (passport) {
       if (req.fileValidationError) {
         res.send({ error: req.fileValidationError })
       } else {
-        const { vendor, import_tag, prev_import_tag, markup } = req.body
+        const {
+          vendor,
+          import_tag,
+          prev_import_tag,
+          markup,
+          force_check
+        } = req.body
         if (!vendor || !import_tag) {
           fs.unlink(req.file.path, () => {})
           res.status(500).json({
@@ -179,15 +185,27 @@ module.exports = function (passport) {
             import_tag,
             req.file.path,
             prev_import_tag,
-            markup
+            markup,
+            force_check
           )
             .then((response) => res.json({ msg: response }))
-            .catch((err) =>
-              res.status(500).json({
+            .catch((err) => {
+              // console.log('err err?.original?.detail:', err?.original?.detail)
+              let msg = `Unable to import products! ${err}. \n`
+              if (err?.original?.detail) {
+                msg += `${err?.original?.detail} \n`
+              }
+              if (err.errors && err.errors.length) {
+                msg += err.errors.reduce((acc, v) => {
+                  acc = `${acc ? `${acc}, \n` : ''}${v.message}`
+                  return acc
+                }, '')
+              }
+              return res.status(500).json({
                 error: true,
-                msg: `Unable to import products! ${err}`
+                msg
               })
-            )
+            })
             .finally(() => {
               fs.unlink(req.file.path, () => {})
             })
