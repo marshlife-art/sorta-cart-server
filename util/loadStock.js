@@ -6,15 +6,15 @@ const fs = require('fs')
 const KNOWN_HEADERS = [
   'unf',
   'upc_code',
-  'on_hand_count',
-  'on_hand_count_change'
+  'count_on_hand',
+  'count_on_hand_change',
+  'no_backorder'
 ]
 
 const HEADER_MAP = {
   'UPC Code': 'upc_code',
-  'Long Name': 'name',
-  'Advertising Description': 'description',
-  M: null
+  on_hand_count: 'count_on_hand',
+  on_hand_count_change: 'count_on_hand_change'
 }
 
 module.exports = (csv_path) => {
@@ -42,18 +42,8 @@ module.exports = (csv_path) => {
       .on('data', (data) => {
         try {
           // console.log('have data:', data)
-
-          // const zkey = Object.keys(data).filter((k) =>
-          //   k.match(/zeroindex__/)
-          // )[0]
-          // data.zero_key = zkey.replace('zeroindex__', '')
-          // data.zero_val = data[zkey]
-          // console.log(
-          //   'have zero_key:',
-          //   data.zero_key,
-          //   ' have data.zero_val:',
-          //   data.zero_val
-          // )
+          // no_backorder is BOOLEAN type
+          data['no_backorder'] = !!data['no_backorder']
           results.push(data)
         } catch (e) {
           errors.push(`error (${e}) processing row: unf: ${data}`)

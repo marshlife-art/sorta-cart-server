@@ -227,12 +227,16 @@ module.exports = function (passport) {
         addStock(dryrun, req.file.path)
           .then((res) => {
             const unknownRowsString = res.unknownRows.length
-              ? `${res.unknownRows.length} rows didn't match a product: ${res.unknownRows}`
+              ? `${
+                  res.unknownRows.length
+                } row(s) didn't match a product: ${res.unknownRows.join(
+                  ', \n'
+                )}`
               : ''
             if (dryrun === 'false') {
-              return `${res.productsUpdated} products updated. ${unknownRowsString}`
+              return `${res.productsUpdated} product(s) updated. ${unknownRowsString}`
             } else {
-              return `Dry Run! ${res.productsUpdated} products will get updated. ${unknownRowsString}`
+              return `Dry Run! ${res.productsUpdated} product(s) will get updated. ${unknownRowsString}`
             }
           })
           .then((response) => res.json({ msg: response }))
