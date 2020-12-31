@@ -216,6 +216,7 @@ const getMyOrders = async (UserId) => {
 
   return await Order.findAll({
     where,
+    order: [['createdAt', 'DESC']],
     include: [OrderLineItem, User, Member]
   })
 }
