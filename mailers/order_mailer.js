@@ -69,7 +69,11 @@ const sendOrderConfirmationEmail = (order) => {
           html: template(
             {
               orders: [
-                { ...order.toJSON(), onHandProducts, backorderProducts }
+                {
+                  ...order.toJSON(),
+                  onHandProducts,
+                  backorderProducts
+                }
               ],
               balance,
               balanceDue

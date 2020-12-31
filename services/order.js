@@ -52,7 +52,7 @@ const createOrder = async (order) => {
   for await (let oli of createdOrder.OrderLineItems) {
     if (oli?.data?.product?.unf || oli?.data?.product?.upc_code) {
       const product = await Product.findOne({
-        attributes: ['count_on_hand'],
+        attributes: ['u_price', 'count_on_hand'],
         where: {
           unf: oli.data.product.unf,
           upc_code: oli.data.product.upc_code
@@ -78,32 +78,45 @@ const createOrder = async (order) => {
           oli.selected_unit === 'CS'
             ? parseInt(`${oli?.data?.product?.pk}`)
             : 1
-        // console.log('caseMultiplier:', caseMultiplier)
 
         const eaQty = isNaN(parseInt(`${oli.quantity}`))
           ? 0
           : parseInt(`${oli.quantity}`) * caseMultiplier
 
+        console.log(
+          'caseMultiplier:',
+          caseMultiplier,
+          ' eaQty:',
+          eaQty,
+          ' pCount:',
+          pCount
+        )
         if (eaQty > pCount) {
           // need to create a backorder line item
-          // console.log(
-          //   'needsAdditionalBackOrder! eaQty - pCount:',
-          //   eaQty - pCount
-          // )
+          const price = parseFloat(`${product.u_price}`)
+          console.log(
+            'zomgggg price:',
+            price,
+            ' total: ',
+            +((eaQty - pCount) * price).toFixed(2)
+          )
           additionalBackOrderItems.push({
             ...oli.get({ plain: true }),
             quantity: eaQty - pCount,
-            total: +((eaQty - pCount) * parseFloat(`${oli.price}`)).toFixed(2),
+            price,
+            total: +((eaQty - pCount) * price).toFixed(2),
             status: 'backorder',
             selected_unit: 'EA'
           })
 
-          oli.total = +(pCount * parseFloat(`${oli.price}`)).toFixed(2)
+          oli.price = price
+          oli.total = +(pCount * price).toFixed(2)
           oli.quantity = pCount
           oli.selected_unit = 'EA'
         }
 
         oli.status = 'on_hand'
+        console.log('zomgggggg oli price and total:', oli.price, oli.total)
         await oli.save()
 
         // console.log(
@@ -141,7 +154,7 @@ const createOrder = async (order) => {
     }
   }
 
-  return createdOrder
+  return await createdOrder.reload()
 }
 
 const updateOrder = async (order) => {
@@ -282,7 +295,6 @@ const validateLineItems = async (lineItems) => {
 
     const product = await Product.findOne({
       where: {
-        // id: li.data.product.id
         [Op.and]: [
           { unf: li.data.product.unf },
           { upc_code: li.data.product.upc_code }
@@ -308,8 +320,8 @@ const validateLineItems = async (lineItems) => {
       li.invalid = undefined
       const liPrice =
         li.selected_unit === 'CS' ? product.ws_price : product.u_price
-      li.price = parseFloat(liPrice)
-      li.total = +(liPrice * li.quantity).toFixed(2)
+      li.price = +parseFloat(liPrice).toFixed(2)
+      li.total = +(liPrice * parseInt(`${li.quantity}`)).toFixed(2)
       invalidLineItems.push(li)
       continue
     }
@@ -332,9 +344,9 @@ const validateLineItems = async (lineItems) => {
         li.invalid = undefined
         // #TOOOODOOOO use selected_unit === 'CS' to setup case => each multiplier.
         li.selected_unit = 'EA'
-        li.price = product.u_price
+        li.price = +parseFloat(`${product.u_price}`).toFixed(2)
         li.quantity = Math.abs(product.count_on_hand)
-        li.total = +(li.quantity * parseFloat(li.price)).toFixed(2)
+        li.total = +(parseInt(li.quantity) * parseFloat(li.price)).toFixed(2)
         // overwrite the product to db changes (like cont_on_hand and no_backorder) since item was added to cart.
         li.data.product = product
         invalidLineItems.push(li)
@@ -359,7 +371,7 @@ const validateLineItems = async (lineItems) => {
       )
       li.invalid = undefined
       li.price = parseFloat(liPrice)
-      li.total = +parseFloat(liPrice * li.quantity).toFixed(2)
+      li.total = +(parseFloat(liPrice) * parseFloat(li.quantity)).toFixed(2)
       invalidLineItems.push(li)
       continue
     }
