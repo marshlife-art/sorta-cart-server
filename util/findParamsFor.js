@@ -45,6 +45,14 @@ const findParamsFor = (query) => {
               [Op.or]: { [iLike]: `%${filter.value}%` }
             }
           }
+        } else if (filter.column.field === 'count_on_hand') {
+          if (filter.value === 'checked') {
+            filters = {
+              count_on_hand: {
+                [Op.and]: { [Op.gt]: 0 }
+              }
+            }
+          }
         } else if (Array.isArray(filter.value)) {
           filters = {
             [filter.column.field]: { [Op.or]: filter.value }
