@@ -105,11 +105,12 @@ module.exports = function (passport) {
         .then((result) => {
           res.json({ success: true, msg: 'ok' })
         })
-        .catch((err) =>
-          res
+        .catch((err) => {
+          console.warn('unable to resend order confirmation email! err:', err)
+          return res
             .status(500)
             .send({ error: 'unable to resend order confirmation email!' })
-        )
+        })
     }
   )
 

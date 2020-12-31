@@ -46,21 +46,98 @@ const createOrder = async (order) => {
   order.OrderLineItems.map((oli) => delete oli.id)
 
   const createdOrder = await Order.create(order, { include: [OrderLineItem] })
+
+  const additionalBackOrderItems = []
+
   for await (let oli of createdOrder.OrderLineItems) {
-    if (oli?.data?.product?.id && oli?.data?.product?.count_on_hand) {
-      console.log(
-        'adjusting oli.quantity decrement:',
-        parseInt(`${oli.quantity}`)
-      )
-      Product.decrement('count_on_hand', {
-        by: parseInt(`${oli.quantity}`),
-        where: { id: oli.data.product.id }
-      }).catch((error) =>
-        console.warn(
-          'caught error trying to decrement Product.count_on_hand! err:',
-          error
+    if (oli?.data?.product?.unf || oli?.data?.product?.upc_code) {
+      const product = await Product.findOne({
+        attributes: ['count_on_hand'],
+        where: {
+          unf: oli.data.product.unf,
+          upc_code: oli.data.product.upc_code
+        },
+        raw: true
+      })
+
+      const pCount = isNaN(parseInt(product.count_on_hand))
+        ? 0
+        : parseInt(product.count_on_hand)
+
+      // so 1. check if there's enough count_on_hand to satasify this li.
+      //  if so, set status = 'on_hand' and Product.decrement('count_on_hand'
+      // if there only some count_on_hand for this li then:
+      //   Product.decrement('count_on_hand') whaterver product.count_on_hand
+      //   set oli.status = 'on_hand' and oli.quantity = eaQty and oli.selected_unit = 'EA'
+      //   and create a new oli with remainder.
+
+      if (pCount > 0) {
+        // console.log('has inventory! need to adjust oli...')
+        const caseMultiplier =
+          !isNaN(parseInt(`${oli?.data?.product?.pk}`)) &&
+          oli.selected_unit === 'CS'
+            ? parseInt(`${oli?.data?.product?.pk}`)
+            : 1
+        // console.log('caseMultiplier:', caseMultiplier)
+
+        const eaQty = isNaN(parseInt(`${oli.quantity}`))
+          ? 0
+          : parseInt(`${oli.quantity}`) * caseMultiplier
+
+        if (eaQty > pCount) {
+          // need to create a backorder line item
+          // console.log(
+          //   'needsAdditionalBackOrder! eaQty - pCount:',
+          //   eaQty - pCount
+          // )
+          additionalBackOrderItems.push({
+            ...oli.get({ plain: true }),
+            quantity: eaQty - pCount,
+            total: +((eaQty - pCount) * parseFloat(`${oli.price}`)).toFixed(2),
+            status: 'backorder',
+            selected_unit: 'EA'
+          })
+
+          oli.total = +(pCount * parseFloat(`${oli.price}`)).toFixed(2)
+          oli.quantity = pCount
+          oli.selected_unit = 'EA'
+        }
+
+        oli.status = 'on_hand'
+        await oli.save()
+
+        // console.log(
+        //   'gonna product.decrement(count_on_hand) by Math.min(eaQty, pCount):',
+        //   Math.min(eaQty, pCount)
+        // )
+        await Product.decrement('count_on_hand', {
+          by: Math.min(eaQty, pCount),
+          where: {
+            unf: oli.data.product.unf,
+            upc_code: oli.data.product.upc_code
+          }
+        }).catch((error) =>
+          console.warn(
+            'caught error trying to decrement Product.count_on_hand! err:',
+            error
+          )
         )
-      )
+      } else {
+        oli.status = 'backorder'
+        await oli.save()
+      }
+    }
+  }
+
+  // console.log('soooo need additionalBackOrderItems:', additionalBackOrderItems)
+
+  for await (li of additionalBackOrderItems) {
+    try {
+      delete li.id
+      const newoli = await OrderLineItem.create(li)
+      await createdOrder.addOrderLineItem(newoli)
+    } catch (error) {
+      console.warn('caught error trying to addOrderLineItem! error:', error)
     }
   }
 
