@@ -568,6 +568,7 @@ const getStoreCreditReport = async () => {
 
   return rows
     .filter((o) => o)
+    .filter((r) => r.store_credit !== 0)
     .sort(function (a, b) {
       return a.store_credit - b.store_credit
     })
