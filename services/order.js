@@ -71,26 +71,16 @@ const createOrder = async (order) => {
       //   set oli.status = 'on_hand' and oli.quantity = eaQty and oli.selected_unit = 'EA'
       //   and create a new oli with remainder.
 
-      if (pCount > 0) {
+      // only account for EA selected_unit, let CS units move to backorder
+
+      if (pCount > 0 && oli.selected_unit === 'EA') {
         // console.log('has inventory! need to adjust oli...')
-        const caseMultiplier =
-          !isNaN(parseInt(`${oli?.data?.product?.pk}`)) &&
-          oli.selected_unit === 'CS'
-            ? parseInt(`${oli?.data?.product?.pk}`)
-            : 1
 
         const eaQty = isNaN(parseInt(`${oli.quantity}`))
           ? 0
-          : parseInt(`${oli.quantity}`) * caseMultiplier
+          : parseInt(`${oli.quantity}`)
 
-        console.log(
-          'caseMultiplier:',
-          caseMultiplier,
-          ' eaQty:',
-          eaQty,
-          ' pCount:',
-          pCount
-        )
+        console.log('is EA selected_unit! eaQty:', eaQty, ' pCount:', pCount)
         if (eaQty > pCount) {
           // need to create a backorder line item
           const price = parseFloat(`${product.u_price}`)
@@ -116,7 +106,11 @@ const createOrder = async (order) => {
         }
 
         oli.status = 'on_hand'
-        console.log('zomgggggg oli price and total:', oli.price, oli.total)
+        console.log(
+          'zomgggggg on_hand oli price and total:',
+          oli.price,
+          oli.total
+        )
         await oli.save()
 
         // console.log(
@@ -342,7 +336,6 @@ const validateLineItems = async (lineItems) => {
           '> > > validateLineItems > > > not enought count_on_hand and no_backorder, adjusting line item qty.'
         )
         li.invalid = undefined
-        // #TOOOODOOOO use selected_unit === 'CS' to setup case => each multiplier.
         li.selected_unit = 'EA'
         li.price = +parseFloat(`${product.u_price}`).toFixed(2)
         li.quantity = Math.abs(product.count_on_hand)
