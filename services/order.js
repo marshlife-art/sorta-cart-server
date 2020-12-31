@@ -314,15 +314,25 @@ const validateLineItems = async (lineItems) => {
       continue
     }
 
-    if (
-      !isNaN(parseInt(li.quantity)) &&
-      parseInt(li.quantity) > product.count_on_hand
-    ) {
+    // convert CS units to EA units before checking count_on_hand.
+    const caseMultiplier =
+      !isNaN(parseInt(`${li?.data?.product?.pk}`)) && li.selected_unit === 'CS'
+        ? parseInt(`${li?.data?.product?.pk}`)
+        : 1
+
+    const eaQty = isNaN(parseInt(`${li.quantity}`))
+      ? 0
+      : parseInt(`${li.quantity}`) * caseMultiplier
+
+    if (eaQty > product.count_on_hand) {
       if (product.no_backorder === true) {
         console.log(
           '> > > validateLineItems > > > not enought count_on_hand and no_backorder, adjusting line item qty.'
         )
         li.invalid = undefined
+        // #TOOOODOOOO use selected_unit === 'CS' to setup case => each multiplier.
+        li.selected_unit = 'EA'
+        li.price = product.u_price
         li.quantity = Math.abs(product.count_on_hand)
         li.total = +(li.quantity * parseFloat(li.price)).toFixed(2)
         // overwrite the product to db changes (like cont_on_hand and no_backorder) since item was added to cart.
