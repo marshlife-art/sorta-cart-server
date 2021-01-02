@@ -214,7 +214,6 @@ module.exports = function (passport) {
     }
   )
 
-  //addStock
   router.post(
     '/products/add_stock',
     passport.authenticate('jwt', { session: false }),
