@@ -14,7 +14,8 @@ const KNOWN_HEADERS = [
 const HEADER_MAP = {
   'UPC Code': 'upc_code',
   on_hand_count: 'count_on_hand',
-  on_hand_count_change: 'count_on_hand_change'
+  on_hand_count_change: 'count_on_hand_change',
+  on_hand_change: 'count_on_hand_change'
 }
 
 module.exports = (csv_path) => {
@@ -43,7 +44,8 @@ module.exports = (csv_path) => {
         try {
           // console.log('have data:', data)
           // no_backorder is BOOLEAN type
-          data['no_backorder'] = !!data['no_backorder']
+          data['no_backorder'] =
+            data['no_backorder'] === 'FALSE' ? false : !!data['no_backorder']
           results.push(data)
         } catch (e) {
           errors.push(`error (${e}) processing row: unf: ${data}`)
