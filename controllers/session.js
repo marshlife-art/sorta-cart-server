@@ -171,12 +171,10 @@ module.exports = function (passport) {
         const auth_key = user.auth_key ? user.auth_key : user.generateAuthKey()
         const payload = { id: user.id, auth_key }
         const token = jwt.sign(payload, process.env.JWT_SECRET)
-        const ONE_DAY_MILLISECONDS = 1000 * 60 * 60 * 24
         res.cookie('token', token, {
           httpOnly: true,
           secure: true, // process.env.NODE_ENV === 'production'
-          sameSite: 'strict',
-          maxAge: ONE_DAY_MILLISECONDS * 30
+          sameSite: 'strict'
         })
 
         res.json({
