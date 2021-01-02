@@ -18,12 +18,30 @@ module.exports = (sequelize, DataTypes) => {
       u_price_cost: DataTypes.DECIMAL(10, 2),
       codes: DataTypes.STRING,
       import_tag: DataTypes.STRING,
-      vendor: DataTypes.STRING
+      vendor: DataTypes.STRING,
+      count_on_hand: DataTypes.INTEGER,
+      no_backorder: DataTypes.BOOLEAN
     },
     {}
   )
-  // Product.associate = function(models) {
-  //   // associations can be defined here
-  // }
+  Product.prototype.addCountOnHand = function (count_on_hand_change) {
+    // try to make sure two values are integers
+    if (isNaN(parseInt(count_on_hand_change))) {
+      console.warn(
+        'Product.addCountOnHand() count_on_hand_change is NaN returning early!'
+      )
+      return
+    }
+    const initialCount = isNaN(parseInt(this.count_on_hand))
+      ? 0
+      : parseInt(this.count_on_hand)
+
+    this.setDataValue(
+      'count_on_hand',
+      initialCount + parseInt(count_on_hand_change)
+    )
+    this.save()
+  }
+
   return Product
 }

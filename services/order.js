@@ -45,7 +45,92 @@ const createOrder = async (order) => {
   delete order.updatedAt
   order.OrderLineItems.map((oli) => delete oli.id)
 
-  return await Order.create(order, { include: [OrderLineItem] })
+  const createdOrder = await Order.create(order, { include: [OrderLineItem] })
+
+  const additionalBackOrderItems = []
+
+  for await (let oli of createdOrder.OrderLineItems) {
+    if (oli?.data?.product?.unf || oli?.data?.product?.upc_code) {
+      const product = await Product.findOne({
+        attributes: ['u_price', 'count_on_hand'],
+        where: {
+          unf: oli.data.product.unf,
+          upc_code: oli.data.product.upc_code
+        },
+        raw: true
+      })
+
+      const pCount = isNaN(parseInt(product.count_on_hand))
+        ? 0
+        : parseInt(product.count_on_hand)
+
+      // so 1. check if there's enough count_on_hand to satasify this li.
+      //  if so, set status = 'on_hand' and Product.decrement('count_on_hand'
+      // if there only some count_on_hand for this li then:
+      //   Product.decrement('count_on_hand') whaterver product.count_on_hand
+      //   set oli.status = 'on_hand' and oli.quantity = eaQty and oli.selected_unit = 'EA'
+      //   and create a new oli with remainder.
+
+      // only account for EA selected_unit, let CS units move to backorder
+
+      if (pCount > 0 && oli.selected_unit === 'EA') {
+        const eaQty = isNaN(parseInt(`${oli.quantity}`))
+          ? 0
+          : parseInt(`${oli.quantity}`)
+
+        if (eaQty > pCount) {
+          // need to create a backorder line item
+          const price = parseFloat(`${product.u_price}`)
+
+          additionalBackOrderItems.push({
+            ...oli.get({ plain: true }),
+            quantity: eaQty - pCount,
+            price,
+            total: +((eaQty - pCount) * price).toFixed(2),
+            status: 'backorder',
+            selected_unit: 'EA'
+          })
+
+          oli.price = price
+          oli.total = +(pCount * price).toFixed(2)
+          oli.quantity = pCount
+          oli.selected_unit = 'EA'
+        }
+
+        oli.status = 'on_hand'
+
+        await oli.save()
+
+        await Product.decrement('count_on_hand', {
+          by: Math.min(eaQty, pCount),
+          where: {
+            unf: oli.data.product.unf,
+            upc_code: oli.data.product.upc_code
+          }
+        }).catch((error) =>
+          console.warn(
+            'caught error trying to decrement Product.count_on_hand! err:',
+            error
+          )
+        )
+      } else {
+        oli.status = 'backorder'
+        await oli.save()
+      }
+    }
+  }
+
+  for await (li of additionalBackOrderItems) {
+    try {
+      delete li.id
+      const newoli = await OrderLineItem.create(li)
+      await createdOrder.addOrderLineItem(newoli)
+    } catch (error) {
+      console.warn('caught error trying to addOrderLineItem! error:', error)
+    }
+  }
+
+  return await createdOrder.reload()
 }
 
 const updateOrder = async (order) => {
@@ -113,6 +198,7 @@ const getMyOrders = async (UserId) => {
 
   return await Order.findAll({
     where,
+    order: [['createdAt', 'DESC']],
     include: [OrderLineItem, User, Member]
   })
 }
@@ -143,65 +229,112 @@ const getMyOrder = async (UserId, OrderId) => {
 }
 
 const validateLineItems = async (lineItems) => {
-  // console.log('validateLineItems lineItems:', lineItems)
-  // #TOOOOOODOOOOOO :/
+  // jesus-fuck if/else! should probz look into assertion lib (like joi?)
 
-  return new Promise((resolve) => {
-    // let invalidLineItems = []
-    // lineItems.forEach(async li => {
-    //   if (
-    //     li.kind !== 'product' ||
-    //     li.kind !== 'tax' ||
-    //     li.kind !== 'adjustment'
-    //   ) {
-    //     invalidLineItems.push(li)
-    //     return
-    //   }
-    //   if (li.kind === 'product') {
-    //     if (li.price <= 0 || li.total <= 0 || li.quantity <= 0) {
-    //       invalidLineItems.push(li)
-    //       return
-    //     }
-    //     if (!li.data || !li.data.product || !li.data.product.id) {
-    //       invalidLineItems.push(li)
-    //       return
-    //     }
-    //     const product = await Product.findOne({
-    //       where: { id: li.data.product.id }
-    //     })
-    //     if (!product && (product.unf || product.upc_code)) {
-    //       const maybeItWasRecreated = await Product.findOne({
-    //         where: {
-    //           [Op.or]: [{ unf: product.unf }, { upc_code: product.upc_code }]
-    //         }
-    //       })
-    //       if (!maybeItWasRecreated) {
-    //         invalidLineItems.push(li)
-    //         return
-    //       }
-    //       if (
-    //         maybeItWasRecreated.ws_price !== li.data.product.ws_price ||
-    //         maybeItWasRecreated.u_price !== li.data.product.u_price
-    //       ) {
-    //         invalidLineItems.push(li)
-    //         return
-    //       }
-    //     }
-    //     if (
-    //       product.ws_price !== li.data.product.ws_price ||
-    //       product.u_price !== li.data.product.u_price
-    //     ) {
-    //       invalidLineItems.push(li)
-    //       return
-    //     }
-    //   }
-    // })
+  let invalidLineItems = []
+  for (const li of lineItems) {
+    // only check product kind
+    if (li.kind !== 'product') {
+      continue
+    }
 
-    resolve({
-      error: false,
-      invalidLineItems: []
+    // bad price, total, or quantity.
+    if (li.price < 0 || li.total < 0 || li.quantity < 0) {
+      li.invalid = 'price, total, or quantity less than zero.'
+      li.quantity = 0
+      li.total = 0
+      invalidLineItems.push(li)
+      continue
+    }
+
+    // no product data ref
+    if (
+      !li.data ||
+      !li.data.product ||
+      !(li.data.product.unf || li.data.product.upc_code)
+    ) {
+      li.invalid = 'product no longer available.'
+      li.quantity = 0
+      li.total = 0
+      invalidLineItems.push(li)
+      continue
+    }
+
+    const product = await Product.findOne({
+      where: {
+        [Op.and]: [
+          { unf: li.data.product.unf },
+          { upc_code: li.data.product.upc_code }
+        ]
+      }
     })
-  })
+    if (!product) {
+      li.invalid = 'product no longer exists.'
+      li.quantity = 0
+      li.total = 0
+      invalidLineItems.push(li)
+      continue
+    }
+
+    if (
+      product.ws_price !== li.data.product.ws_price ||
+      product.u_price !== li.data.product.u_price
+    ) {
+      li.invalid = undefined
+      const liPrice =
+        li.selected_unit === 'CS' ? product.ws_price : product.u_price
+      li.price = +parseFloat(liPrice).toFixed(2)
+      li.total = +(liPrice * parseInt(`${li.quantity}`)).toFixed(2)
+      invalidLineItems.push(li)
+      continue
+    }
+
+    // convert CS units to EA units before checking count_on_hand.
+    const caseMultiplier =
+      !isNaN(parseInt(`${li?.data?.product?.pk}`)) && li.selected_unit === 'CS'
+        ? parseInt(`${li?.data?.product?.pk}`)
+        : 1
+
+    const eaQty = isNaN(parseInt(`${li.quantity}`))
+      ? 0
+      : parseInt(`${li.quantity}`) * caseMultiplier
+
+    if (eaQty > product.count_on_hand) {
+      if (product.no_backorder === true) {
+        li.invalid = undefined
+        li.selected_unit = 'EA'
+        li.price = +parseFloat(`${product.u_price}`).toFixed(2)
+        li.quantity = Math.abs(product.count_on_hand)
+        li.total = +(parseInt(li.quantity) * parseFloat(li.price)).toFixed(2)
+        // overwrite the product to db changes (like cont_on_hand and no_backorder) since item was added to cart.
+        li.data.product = product
+        invalidLineItems.push(li)
+        continue
+      }
+      // else {
+      //   continue
+      // }
+    }
+
+    const liPrice =
+      li.selected_unit === 'CS' ? product.ws_price : product.u_price
+    if (
+      li.price != liPrice ||
+      li.total != (liPrice * li.quantity).toFixed(2)
+      // note: not using super-strict comparison !== here :/
+    ) {
+      li.invalid = undefined
+      li.price = parseFloat(liPrice)
+      li.total = +(parseFloat(liPrice) * parseFloat(li.quantity)).toFixed(2)
+      invalidLineItems.push(li)
+      continue
+    }
+  }
+
+  return {
+    error: invalidLineItems.length > 0,
+    invalidLineItems
+  }
 }
 
 const resendOrderConfirmationEmail = async (orderId) => {
@@ -256,7 +389,7 @@ const getStoreCreditForMember = async (MemberId) => {
       .reduce((sum, i) => sum + i, 0)
   )
 
-  return parseFloat((credits + Math.abs(adjustments)).toFixed(2))
+  return +(credits + Math.abs(adjustments)).toFixed(2)
 }
 
 const getStoreCredit = async (UserId) => {
@@ -366,9 +499,7 @@ const getStoreCreditReport = async () => {
         adjustments
       } = await getStoreCreditLineItemsForMember(member.id)
 
-      const store_credit = parseFloat(
-        (credits_sum + Math.abs(adjustments_sum)).toFixed(2)
-      )
+      const store_credit = +(credits_sum + Math.abs(adjustments_sum)).toFixed(2)
 
       return adjustments.length || credits.length
         ? {
@@ -385,6 +516,7 @@ const getStoreCreditReport = async () => {
 
   return rows
     .filter((o) => o)
+    .filter((r) => r.store_credit !== 0)
     .sort(function (a, b) {
       return a.store_credit - b.store_credit
     })
@@ -396,6 +528,18 @@ const getMemberOrders = async (MemberId) => {
     attributes: ['id', 'createdAt', 'item_count', 'total'],
     raw: true
   })
+}
+
+const getRecentOrders = async () => {
+  return await models.sequelize.query(
+    `SELECT * FROM "Orders" WHERE "createdAt" BETWEEN
+  NOW()::DATE-EXTRACT(DOW FROM NOW())::INTEGER-14 
+  AND NOW() ORDER BY "createdAt" DESC;`,
+    {
+      model: Order,
+      mapToModel: true
+    }
+  )
 }
 
 module.exports = {
@@ -411,5 +555,6 @@ module.exports = {
   getStoreCredit,
   getStoreCreditForMember,
   getStoreCreditReport,
-  getMemberOrders
+  getMemberOrders,
+  getRecentOrders
 }

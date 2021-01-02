@@ -58,6 +58,12 @@ module.exports = {
         import_tag: {
           type: Sequelize.STRING
         },
+        count_on_hand: {
+          type: Sequelize.INTEGER
+        },
+        no_backorder: {
+          type: Sequelize.BOOLEAN
+        },
         createdAt: {
           allowNull: false,
           type: Sequelize.DATE,
@@ -76,6 +82,10 @@ module.exports = {
       .then(() => queryInterface.addIndex('Products', ['u_price']))
       .then(() => queryInterface.addIndex('Products', ['import_tag']))
       .then(() => queryInterface.addIndex('Products', ['unf']))
+      .then(() => queryInterface.addIndex('Products', ['count_on_hand']))
+      .then(() => queryInterface.addIndex('Products', ['unf', 'upc_code']), {
+        unique: true
+      })
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable('Products')

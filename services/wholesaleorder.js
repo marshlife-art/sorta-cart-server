@@ -43,6 +43,9 @@ const getLineItems = async (query) => {
     [Op.eq]: 'product'
   }
 
+  findParams.where['status'] = {
+    [Op.ne]: 'on_hand'
+  }
   return await OrderLineItem.findAndCountAll(findParams)
 }
 

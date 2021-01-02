@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       description: DataTypes.STRING,
       vendor: DataTypes.STRING,
       selected_unit: DataTypes.STRING,
+      status: DataTypes.STRING,
       data: DataTypes.JSONB
     },
     {}

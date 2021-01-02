@@ -29,6 +29,14 @@ const sendOrderConfirmationEmail = (order) => {
       resolve()
     } else if (order && order.email) {
       const line_items = order.OrderLineItems || []
+
+      const onHandProducts = line_items.filter(
+        (li) => li.kind === 'product' && li.status === 'on_hand'
+      )
+      const backorderProducts = line_items.filter(
+        (li) => li.kind === 'product' && li.status !== 'on_hand'
+      )
+
       const payments = line_items.filter((li) => li.kind === 'payment')
       const paymentsTotal = payments.reduce(
         (acc, v) => acc + parseFloat(`${v.total}`),
@@ -58,7 +66,29 @@ const sendOrderConfirmationEmail = (order) => {
               : 'MARSH ORDERS <bioculturalist@gmail.com>',
           subject: 'Your receipt from MARSH COOP',
           // text: 'order receipt'
-          html: template({ orders: [order.toJSON()], balance, balanceDue })
+          html: template(
+            {
+              orders: [
+                {
+                  ...order.toJSON(),
+                  onHandProducts,
+                  backorderProducts
+                }
+              ],
+              balance,
+              balanceDue
+            },
+            {
+              allowedProtoProperties: {
+                vendor: true,
+                description: true,
+                quantity: true,
+                selected_unit: true,
+                price: true,
+                total: true
+              }
+            }
+          )
         },
         function (error, body) {
           // error && console.warn(body)

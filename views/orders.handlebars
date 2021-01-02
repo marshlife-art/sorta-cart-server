@@ -175,7 +175,11 @@
         <th align="right">total</th>
       </tr>
 
-      {{#each_when this.OrderLineItems "kind" "product"}}
+      {{#if this.onHandProducts}}
+      <tr class="li">
+        <td>On Hand</td>
+      </tr>
+      {{#each this.onHandProducts}}
       <tr class="li">
         <td align="center">{{this.vendor}}</td>
         <td>{{this.description}}</td>
@@ -184,7 +188,24 @@
         <td align="right">{{this.price}}</td>
         <td align="right">{{this.total}}</td>
       </tr>
-      {{/each_when}}
+      {{/each}}
+      {{/if}}
+
+      {{#if this.backorderProducts.length}}
+      <tr class="li">
+        <td>Backordered</td>
+      </tr>
+      {{#each this.backorderProducts}}
+      <tr class="li">
+        <td align="center">{{this.vendor}}</td>
+        <td>{{this.description}}</td>
+        <td align="left">{{this.quantity}}</td>
+        <td align="center">{{this.selected_unit}}</td>
+        <td align="right">{{this.price}}</td>
+        <td align="right">{{this.total}}</td>
+      </tr>
+      {{/each}}
+      {{/if}}
 
       <tr>
         <td colspan="5"></td>

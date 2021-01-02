@@ -6,7 +6,8 @@ const {
   createOrder,
   updateOrder,
   getOrdersByIds,
-  resendOrderConfirmationEmail
+  resendOrderConfirmationEmail,
+  getRecentOrders
 } = require('../services/order')
 
 module.exports = function (passport) {
@@ -19,6 +20,20 @@ module.exports = function (passport) {
           data: result.rows,
           page: req.body && req.body.page ? req.body.page : 0,
           totalCount: result.count
+        })
+      )
+    }
+  )
+
+  router.get(
+    '/orders/recent',
+    passport.authenticate('jwt', { session: false }),
+    function (req, res) {
+      getRecentOrders().then((result) =>
+        res.json({
+          data: result,
+          page: 0,
+          totalCount: result.length
         })
       )
     }
@@ -90,11 +105,12 @@ module.exports = function (passport) {
         .then((result) => {
           res.json({ success: true, msg: 'ok' })
         })
-        .catch((err) =>
-          res
+        .catch((err) => {
+          console.warn('unable to resend order confirmation email! err:', err)
+          return res
             .status(500)
             .send({ error: 'unable to resend order confirmation email!' })
-        )
+        })
     }
   )
 

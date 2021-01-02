@@ -10,7 +10,10 @@ const {
   destroyProducts,
   getProductVendors,
   getProductImportTags,
-  addProducts
+  addProducts,
+  getProductStock,
+  addStock,
+  getStockCsv
 } = require('../services/product')
 
 const upload = multer({
@@ -47,6 +50,32 @@ module.exports = function (passport) {
       })
     )
   })
+
+  router.post('/products/stock', function (req, res) {
+    getProductStock(req.body).then((result) =>
+      res.json({
+        data: result.rows,
+        page: req.body && req.body.page ? req.body.page : 0,
+        totalCount: result.count
+      })
+    )
+  })
+
+  router.get(
+    '/products/stock_csv',
+    passport.authenticate('jwt', { session: false }),
+    function (req, res) {
+      getStockCsv()
+        .then((data) => {
+          res.attachment(`MARSH_ON_HAND_${Date.now()}.csv`)
+          res.status(200).send(data)
+        })
+        .catch((error) => {
+          console.warn('stock_csv caught error:', error)
+          res.status(500)
+        })
+    }
+  )
 
   router.get('/categories', function (req, res) {
     return getCategories().then((result) =>
@@ -137,7 +166,13 @@ module.exports = function (passport) {
       if (req.fileValidationError) {
         res.send({ error: req.fileValidationError })
       } else {
-        const { vendor, import_tag, prev_import_tag, markup } = req.body
+        const {
+          vendor,
+          import_tag,
+          prev_import_tag,
+          markup,
+          force_check
+        } = req.body
         if (!vendor || !import_tag) {
           fs.unlink(req.file.path, () => {})
           res.status(500).json({
@@ -150,19 +185,69 @@ module.exports = function (passport) {
             import_tag,
             req.file.path,
             prev_import_tag,
-            markup
+            markup,
+            force_check
           )
             .then((response) => res.json({ msg: response }))
-            .catch((err) =>
-              res.status(500).json({
+            .catch((err) => {
+              // console.log('err err?.original?.detail:', err?.original?.detail)
+              let msg = `Unable to import products! ${err}. \n`
+              if (err?.original?.detail) {
+                msg += `${err?.original?.detail} \n`
+              }
+              if (err.errors && err.errors.length) {
+                msg += err.errors.reduce((acc, v) => {
+                  acc = `${acc ? `${acc}, \n` : ''}${v.message}`
+                  return acc
+                }, '')
+              }
+              return res.status(500).json({
                 error: true,
-                msg: `Unable to import products! ${err}`
+                msg
               })
-            )
+            })
             .finally(() => {
               fs.unlink(req.file.path, () => {})
             })
         }
+      }
+    }
+  )
+
+  router.post(
+    '/products/add_stock',
+    passport.authenticate('jwt', { session: false }),
+    upload.single('file'),
+    function (req, res, next) {
+      if (req.fileValidationError) {
+        res.send({ error: req.fileValidationError })
+      } else {
+        const { dryrun } = req.body
+        addStock(dryrun, req.file.path)
+          .then((res) => {
+            const unknownRowsString = res.unknownRows.length
+              ? `${
+                  res.unknownRows.length
+                } row(s) didn't match a product: ${res.unknownRows.join(
+                  ', \n'
+                )}`
+              : ''
+            if (dryrun === 'false') {
+              return `${res.productsUpdated} product(s) updated. ${unknownRowsString}`
+            } else {
+              return `Dry Run! ${res.productsUpdated} product(s) will get updated. ${unknownRowsString}`
+            }
+          })
+          .then((response) => res.json({ msg: response }))
+          .catch((err) =>
+            res.status(500).json({
+              error: true,
+              msg: `Unable to add stock! ${err}`
+            })
+          )
+          .finally(() => {
+            fs.unlink(req.file.path, () => {})
+          })
       }
     }
   )

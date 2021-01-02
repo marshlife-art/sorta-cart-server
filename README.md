@@ -133,6 +133,26 @@ kubectl set image deployments/sorta-cart-server sorta-cart-server=3dwardsharp/so
 
 ### MISC
 
+#### localhost https proxy
+
+initial setup:
+
+```sh
+brew install mkcert
+
+mkcert -install
+
+mkdir .cert
+
+mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem "*.marsh.dev" localhost 127.0.0.1 ::1
+```
+
+start a server on localhost:3000, localhost:3001, localhost:3002 then run:
+
+```sh
+npm run dev:https
+```
+
 #### sequelize CLI
 
 generate some models:  

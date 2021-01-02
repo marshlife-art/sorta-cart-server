@@ -1,6 +1,8 @@
 const findParamsFor = require('../util/findParamsFor')
 const models = require('../models')
 const loadProductsCSV = require('../util/loadProductsCSV')
+const loadStock = require('../util/loadStock')
+const { parse } = require('json2csv')
 
 const Product = models.Product
 const Op = models.Sequelize.Op
@@ -66,36 +68,185 @@ const getProductVendors = async () =>
 const getProductImportTags = async () =>
   Product.aggregate('import_tag', 'DISTINCT', { plain: false })
 
+const getProductStock = async (query) => {
+  // this is mostly same as getProducts() fn ++ count_on_hand IS NOT NULL
+  // get fucked abstractionz (long live copy&paste!) :/
+
+  let findParams = findParamsFor(query)
+
+  const q = query.search || ''
+  if (q) {
+    const filters = [
+      {
+        name: { [Op.and]: q.split(' ').map((val) => ({ [iLike]: `%${val}%` })) }
+      },
+      {
+        description: {
+          [Op.and]: q.split(' ').map((val) => ({ [iLike]: `%${val}%` }))
+        }
+      },
+      { sub_category: { [iLike]: `%${q}%` } },
+      { category: { [iLike]: `%${q}%` } }
+    ]
+
+    if (findParams.where[Op.or] && findParams.where[Op.or].length) {
+      findParams.where[Op.or].push(filters)
+    } else {
+      findParams.where[Op.or] = filters
+    }
+  }
+
+  // push in some special findParams to SELECT products WHERE count_on_hand IS NOT NULL;
+  if (findParams.where[Op.and] && findParams.where[Op.and].length) {
+    findParams.where[Op.and].push({
+      count_on_hand: { [Op.ne]: null }
+    })
+  } else {
+    findParams.where[Op.and] = {
+      count_on_hand: { [Op.ne]: null }
+    }
+  }
+
+  return await Product.findAndCountAll(findParams)
+}
+
 const addProducts = async (
   vendor,
   import_tag,
   csvFile,
   prev_import_tag,
-  markup
+  markup,
+  force_check
 ) => {
-  return loadProductsCSV(csvFile, import_tag, vendor, markup).then(
-    (products) => {
-      return models.sequelize.transaction((t) => {
-        // chain all your queries here. make sure you return them.
-        if (prev_import_tag !== undefined && prev_import_tag !== '') {
-          return Product.destroy(
-            { where: { import_tag: prev_import_tag } },
-            { transaction: t }
-          ).then((destroyResponse) => {
-            return Product.bulkCreate(products, { transaction: t }).then(
-              (response) => {
-                return `success! first destroyed ${destroyResponse} products and then created ${response.length} products.`
-              }
-            )
-          })
-        } else {
-          return Product.bulkCreate(products).then((response) => {
-            return `success! created ${response.length} products!`
-          })
+  const productsOnHand = await Product.findAll({
+    attributes: ['id', 'unf', 'upc_code', 'count_on_hand'],
+    where: {
+      count_on_hand: {
+        [Op.and]: {
+          [Op.ne]: null,
+          [Op.ne]: 0
         }
+      }
+    },
+    raw: true
+  })
+
+  const products = await loadProductsCSV(csvFile, import_tag, vendor, markup)
+
+  const onHandIntersect = productsOnHand.map((oh) =>
+    products.find((p) => p.unf === oh.unf && p.upc_code === oh.upc_code)
+  )
+
+  let existingIdsToDestroy = productsOnHand.reduce((acc, oh) => {
+    const product = products.find(
+      (p) => p.unf === oh.unf && p.upc_code === oh.upc_code
+    )
+    if (product) {
+      product.count_on_hand = oh.count_on_hand
+      acc.push(oh.id)
+    }
+    return acc
+  }, [])
+
+  if (force_check === 'true') {
+    const existingProductsToDestroy = []
+    for await (const p of products) {
+      const product = await Product.findOne({
+        attributes: ['id', 'count_on_hand'],
+        where: { unf: p.unf, upc_code: p.upc_code },
+        raw: true
+      })
+      if (product) {
+        p.count_on_hand = product.count_on_hand
+        existingProductsToDestroy.push(product.id)
+      }
+    }
+
+    existingIdsToDestroy = [
+      ...existingIdsToDestroy,
+      ...existingProductsToDestroy
+    ]
+  }
+
+  return models.sequelize.transaction((transaction) => {
+    // chain transaction queries here; make sure to return them.
+    if (
+      (prev_import_tag !== undefined && prev_import_tag !== '') ||
+      (existingIdsToDestroy && existingIdsToDestroy.length)
+    ) {
+      let where = {}
+      if (prev_import_tag !== undefined && prev_import_tag !== '') {
+        where = { import_tag: prev_import_tag }
+      }
+      if (existingIdsToDestroy && existingIdsToDestroy.length) {
+        where = { [Op.or]: { ...where, id: existingIdsToDestroy } }
+      }
+      return Product.destroy({ where, transaction }).then((destroyResponse) => {
+        return Product.bulkCreate(products, {
+          transaction
+        }).then((response) => {
+          return `success! first destroyed ${destroyResponse} products and then created ${response.length} products.`
+        })
+      })
+    } else {
+      return Product.bulkCreate(products).then((response) => {
+        return `success! created ${response.length} products!`
       })
     }
-  )
+  })
+}
+
+const addStock = async (dryrun, csvFile) => {
+  const products = await loadStock(csvFile)
+
+  let productsUpdated = 0
+  let unknownRows = []
+
+  for (const p of products) {
+    if (p.unf || p.upc_code) {
+      const product = await Product.findOne({
+        where: { unf: p.unf, upc_code: p.upc_code }
+      })
+      if (
+        product &&
+        (!isNaN(parseInt(p.count_on_hand_change)) ||
+          !isNaN(parseInt(p.count_on_hand)) ||
+          product.no_backorder !== p.no_backorder)
+      ) {
+        if (dryrun === 'false') {
+          //first check count_on_hand for hard count, then count_on_hand_change
+          if (!isNaN(parseInt(p.count_on_hand))) {
+            product.count_on_hand = parseInt(p.count_on_hand)
+            product.save()
+          } else if (!isNaN(parseInt(p.count_on_hand_change))) {
+            product.addCountOnHand(p.count_on_hand_change)
+          }
+          if (product.no_backorder !== p.no_backorder) {
+            product.no_backorder = !!p.no_backorder
+            product.save()
+          }
+        }
+        productsUpdated += 1
+      } else {
+        unknownRows.push(`unf: '${p.unf}' upc_code: '${p.upc_code}'`)
+      }
+    } else {
+      const idx = products.indexOf(p)
+      unknownRows.push(`no unf and upc_code idx:${idx}`)
+    }
+  }
+
+  return { productsUpdated, unknownRows }
+}
+
+const getStockCsv = async () => {
+  const products = await Product.findAll({
+    where: {
+      count_on_hand: { [Op.ne]: null }
+    },
+    raw: true
+  })
+  return parse(products)
 }
 
 module.exports = {
@@ -105,5 +256,8 @@ module.exports = {
   destroyProducts,
   getProductVendors,
   getProductImportTags,
-  addProducts
+  getProductStock,
+  addProducts,
+  addStock,
+  getStockCsv
 }
