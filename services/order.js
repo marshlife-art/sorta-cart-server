@@ -74,22 +74,14 @@ const createOrder = async (order) => {
       // only account for EA selected_unit, let CS units move to backorder
 
       if (pCount > 0 && oli.selected_unit === 'EA') {
-        // console.log('has inventory! need to adjust oli...')
-
         const eaQty = isNaN(parseInt(`${oli.quantity}`))
           ? 0
           : parseInt(`${oli.quantity}`)
 
-        console.log('is EA selected_unit! eaQty:', eaQty, ' pCount:', pCount)
         if (eaQty > pCount) {
           // need to create a backorder line item
           const price = parseFloat(`${product.u_price}`)
-          console.log(
-            'zomgggg price:',
-            price,
-            ' total: ',
-            +((eaQty - pCount) * price).toFixed(2)
-          )
+
           additionalBackOrderItems.push({
             ...oli.get({ plain: true }),
             quantity: eaQty - pCount,
@@ -106,17 +98,9 @@ const createOrder = async (order) => {
         }
 
         oli.status = 'on_hand'
-        console.log(
-          'zomgggggg on_hand oli price and total:',
-          oli.price,
-          oli.total
-        )
+
         await oli.save()
 
-        // console.log(
-        //   'gonna product.decrement(count_on_hand) by Math.min(eaQty, pCount):',
-        //   Math.min(eaQty, pCount)
-        // )
         await Product.decrement('count_on_hand', {
           by: Math.min(eaQty, pCount),
           where: {
@@ -135,8 +119,6 @@ const createOrder = async (order) => {
       }
     }
   }
-
-  // console.log('soooo need additionalBackOrderItems:', additionalBackOrderItems)
 
   for await (li of additionalBackOrderItems) {
     try {
@@ -247,11 +229,6 @@ const getMyOrder = async (UserId, OrderId) => {
 }
 
 const validateLineItems = async (lineItems) => {
-  // console.log('> > > validateLineItems > > > lineItems:', lineItems)
-  console.log(
-    '> > > validateLineItems > > > lineItems.length:',
-    lineItems.length
-  )
   // jesus-fuck if/else! should probz look into assertion lib (like joi?)
 
   let invalidLineItems = []
@@ -263,9 +240,6 @@ const validateLineItems = async (lineItems) => {
 
     // bad price, total, or quantity.
     if (li.price < 0 || li.total < 0 || li.quantity < 0) {
-      console.log(
-        '> > > validateLineItems > > >: price, total, or quantity less than zero.'
-      )
       li.invalid = 'price, total, or quantity less than zero.'
       li.quantity = 0
       li.total = 0
@@ -273,14 +247,12 @@ const validateLineItems = async (lineItems) => {
       continue
     }
 
-    console.log('> > > validateLineItems > > >  looking up:', li.description)
     // no product data ref
     if (
       !li.data ||
       !li.data.product ||
       !(li.data.product.unf || li.data.product.upc_code)
     ) {
-      console.log('> > > validateLineItems > > > no product data ref')
       li.invalid = 'product no longer available.'
       li.quantity = 0
       li.total = 0
@@ -301,7 +273,6 @@ const validateLineItems = async (lineItems) => {
       li.quantity = 0
       li.total = 0
       invalidLineItems.push(li)
-      console.log('> > > validateLineItems > > > product no longer exists.')
       continue
     }
 
@@ -309,9 +280,6 @@ const validateLineItems = async (lineItems) => {
       product.ws_price !== li.data.product.ws_price ||
       product.u_price !== li.data.product.u_price
     ) {
-      console.log(
-        '! ! ! ! ! ! ! ! ! ! ! ! !> > > validateLineItems > > > prices no longer match. gonna update cart!!!!!!!'
-      )
       li.invalid = undefined
       const liPrice =
         li.selected_unit === 'CS' ? product.ws_price : product.u_price
@@ -333,9 +301,6 @@ const validateLineItems = async (lineItems) => {
 
     if (eaQty > product.count_on_hand) {
       if (product.no_backorder === true) {
-        console.log(
-          '> > > validateLineItems > > > not enought count_on_hand and no_backorder, adjusting line item qty.'
-        )
         li.invalid = undefined
         li.selected_unit = 'EA'
         li.price = +parseFloat(`${product.u_price}`).toFixed(2)
@@ -345,12 +310,10 @@ const validateLineItems = async (lineItems) => {
         li.data.product = product
         invalidLineItems.push(li)
         continue
-      } else {
-        console.log(
-          '> > > validateLineItems > > > not enought count_on_hand, will need to back order'
-        )
-        continue
       }
+      // else {
+      //   continue
+      // }
     }
 
     const liPrice =
@@ -360,9 +323,6 @@ const validateLineItems = async (lineItems) => {
       li.total != (liPrice * li.quantity).toFixed(2)
       // note: not using super-strict comparison !== here :/
     ) {
-      console.log(
-        '! ! ! ! ! ! ! ! ! ! ! ! !> > > validateLineItems > > > li total is wrong. gonna update cart!!!!!!!'
-      )
       li.invalid = undefined
       li.price = parseFloat(liPrice)
       li.total = +(parseFloat(liPrice) * parseFloat(li.quantity)).toFixed(2)
@@ -371,12 +331,6 @@ const validateLineItems = async (lineItems) => {
     }
   }
 
-  console.log(
-    'invalidLineItems.length:',
-    invalidLineItems.length,
-    ' error:',
-    invalidLineItems.length > 0
-  )
   return {
     error: invalidLineItems.length > 0,
     invalidLineItems

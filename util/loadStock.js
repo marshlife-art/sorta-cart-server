@@ -42,7 +42,6 @@ module.exports = (csv_path) => {
       )
       .on('data', (data) => {
         try {
-          // console.log('have data:', data)
           // no_backorder is BOOLEAN type
           data['no_backorder'] =
             data['no_backorder'] === 'FALSE' ? false : !!data['no_backorder']

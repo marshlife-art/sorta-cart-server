@@ -80,7 +80,6 @@ const findParamsFor = (query) => {
     })
   }
 
-  console.log('findParams:', JSON.stringify(findParams))
   return findParams
 }
 

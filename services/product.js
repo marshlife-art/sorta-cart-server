@@ -133,11 +133,9 @@ const addProducts = async (
 
   const products = await loadProductsCSV(csvFile, import_tag, vendor, markup)
 
-  console.log('zomg sooo productsOnHand:', productsOnHand)
   const onHandIntersect = productsOnHand.map((oh) =>
     products.find((p) => p.unf === oh.unf && p.upc_code === oh.upc_code)
   )
-  console.log('onHandIntersect: ', onHandIntersect)
 
   let existingIdsToDestroy = productsOnHand.reduce((acc, oh) => {
     const product = products.find(
@@ -151,7 +149,6 @@ const addProducts = async (
   }, [])
 
   if (force_check === 'true') {
-    console.log('zomg force_check true!!!!!')
     const existingProductsToDestroy = []
     for await (const p of products) {
       const product = await Product.findOne({
@@ -171,7 +168,6 @@ const addProducts = async (
     ]
   }
 
-  console.log('existingIdsToDestroy:', existingIdsToDestroy)
   return models.sequelize.transaction((transaction) => {
     // chain transaction queries here; make sure to return them.
     if (
@@ -185,7 +181,6 @@ const addProducts = async (
       if (existingIdsToDestroy && existingIdsToDestroy.length) {
         where = { [Op.or]: { ...where, id: existingIdsToDestroy } }
       }
-      console.log('destroy where:', where)
       return Product.destroy({ where, transaction }).then((destroyResponse) => {
         return Product.bulkCreate(products, {
           transaction
@@ -209,12 +204,6 @@ const addStock = async (dryrun, csvFile) => {
 
   for (const p of products) {
     if (p.unf || p.upc_code) {
-      console.log(
-        'looking for product where p.unf:',
-        p.unf,
-        ' and upc_code:',
-        p.upc_code
-      )
       const product = await Product.findOne({
         where: { unf: p.unf, upc_code: p.upc_code }
       })
@@ -227,7 +216,6 @@ const addStock = async (dryrun, csvFile) => {
         if (dryrun === 'false') {
           //first check count_on_hand for hard count, then count_on_hand_change
           if (!isNaN(parseInt(p.count_on_hand))) {
-            console.log('hard count_on_hand')
             product.count_on_hand = parseInt(p.count_on_hand)
             product.save()
           } else if (!isNaN(parseInt(p.count_on_hand_change))) {
@@ -240,19 +228,9 @@ const addStock = async (dryrun, csvFile) => {
         }
         productsUpdated += 1
       } else {
-        console.log(
-          'adding unknownRows cuz no product and count_on_hand_change or count_on_hand',
-          ' !isNaN(parseInt(p.count_on_hand_change)):',
-          !isNaN(parseInt(p.count_on_hand_change)),
-          ' !isNaN(parseInt(p.count_on_hand)):',
-          !isNaN(parseInt(p.count_on_hand)),
-          ' sooo p:',
-          p
-        )
         unknownRows.push(`unf: '${p.unf}' upc_code: '${p.upc_code}'`)
       }
     } else {
-      console.log('zomg no unf and upc_code:', p)
       const idx = products.indexOf(p)
       unknownRows.push(`no unf and upc_code idx:${idx}`)
     }

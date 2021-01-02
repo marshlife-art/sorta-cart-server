@@ -181,7 +181,8 @@ module.exports = (csv_path, import_tag, vendor, markup) => {
             data['pk'] = pk && !isNaN(parseInt(pk)) ? parseInt(pk) : 1 // i guess default 1 makes sense here
 
             // no_backorder is BOOLEAN type
-            data['no_backorder'] = !!data['no_backorder']
+            data['no_backorder'] =
+              data['no_backorder'] === 'FALSE' ? false : !!data['no_backorder']
 
             data['import_tag'] = import_tag
             data['vendor'] = vendor
