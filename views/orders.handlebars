@@ -176,8 +176,8 @@
       </tr>
 
       {{#if this.onHandProducts}}
-      <tr class="li">
-        <td>On Hand</td>
+      <tr>
+        <td colspan="6" align="left" class="divider bottom-border">On Hand</td>
       </tr>
       {{#each this.onHandProducts}}
       <tr class="li">
@@ -192,8 +192,8 @@
       {{/if}}
 
       {{#if this.backorderProducts.length}}
-      <tr class="li">
-        <td>Backordered</td>
+      <tr>
+        <td colspan="6" align="left" class="divider bottom-border">Backordered</td>
       </tr>
       {{#each this.backorderProducts}}
       <tr class="li">

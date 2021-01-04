@@ -5,7 +5,11 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const passport = require('passport')
 const JWTStrategy = require('passport-jwt').Strategy
+const Handlebars = require('handlebars')
 const exphbs = require('express-handlebars')
+const {
+  allowInsecurePrototypeAccess
+} = require('@handlebars/allow-prototype-access')
 
 const { getUser } = require('./services/user')
 
@@ -81,7 +85,8 @@ const hbs = exphbs.create({
         if (list[i][k] == v) result = result + opts.fn(list[i])
       return result
     }
-  }
+  },
+  handlebars: allowInsecurePrototypeAccess(Handlebars)
 })
 app.engine('handlebars', hbs.engine)
 app.set('view engine', 'handlebars')

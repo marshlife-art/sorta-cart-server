@@ -87,10 +87,28 @@ module.exports = function (passport) {
       const { orderIds } = req.body
       getOrdersByIds(orderIds)
         .then((orders) => {
-          res.render('orders', {
-            orders: orders.map((order) => order.toJSON())
+          return orders.map((order) => {
+            const line_items = order.OrderLineItems || []
+
+            const onHandProducts = line_items.filter(
+              (li) => li.kind === 'product' && li.status === 'on_hand'
+            )
+            const backorderProducts = line_items.filter(
+              (li) => li.kind === 'product' && li.status !== 'on_hand'
+            )
+
+            return {
+              ...order.toJSON(),
+              onHandProducts,
+              backorderProducts
+            }
           })
         })
+        .then((orders) =>
+          res.render('orders', {
+            orders
+          })
+        )
         .catch((err) =>
           res.status(500).send({ error: `unable to print orders err: ${err}` })
         )
