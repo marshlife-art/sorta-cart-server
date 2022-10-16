@@ -131,6 +131,22 @@ kubectl logs sorta-cart-server-564b889d88-7dvmx
 kubectl set image deployments/sorta-cart-server sorta-cart-server=3dwardsharp/sorta-cart-server:0.0.9
 ```
 
+##### SSL CERTZ
+
+`doctl compute certificate list`
+
+get `ID` value for `api.marshcoop.org`
+
+okay get service yaml
+`kubectl get service sorta-cart-server -o yaml`
+
+copy/paste it into (new) file named: `sorta-cart-server-svc.yaml`
+
+diff before apply
+`kubectl diff -f ./sorta-cart-server-svc.yaml`
+all good? then do it
+`kubectl apply -f ./sorta-cart-server-svc.yaml`
+
 ### MISC
 
 #### localhost https proxy
